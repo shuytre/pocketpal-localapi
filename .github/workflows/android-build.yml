@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,6 +31,9 @@ jobs:
 
       - name: Create placeholder google-services.json
         run: touch android/app/google-services.json
+
+      - name: Fix permission for shell scripts
+        run: chmod +x ./scripts/*.sh
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
