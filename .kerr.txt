@@ -1,0 +1,21 @@
+﻿> Task :app:kaptGenerateStubsProdDebugKotlin
+> Task :app:kaptProdDebugKotlin
+
+> Task :app:compileProdDebugKotlin FAILED
+gradle.bat : e: file:///D:/PocketPal/android/app/src/main/java/com/pocketpalai/perf/PerfTuneModule.kt:20:35 Unresolved 
+reference 'CountDownLatch'.
+所在位置 行:445 字符: 404
++ ... radle.bat'; & $g :app:compileProdDebugKotlin --console=plain *>&1 | T ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (e: file:///D:/P...ountDownLatch'.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+[Incubating] Problems report is available at: file:///D:/PocketPal/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileProdDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCo
+mpilerWorkAction

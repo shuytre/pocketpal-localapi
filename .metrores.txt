@@ -1,0 +1,27 @@
+﻿                 鈻撯枔鈻戔枒鈻撯枔鈻撯枔鈻撯枓鈻掆枓鈻掆枔鈻撯枔鈻撯枓鈻戔枒鈻撯枔
+                 鈻撯枔鈻戔枒鈻撯枔鈻撯枔鈻撯枔鈻撯枔鈻撯枔鈻撯枔鈻撯枓鈻戔枒鈻撯枔
+                 鈻撯枔鈻掆枒鈻戔枓鈻掆枔鈻撯枔鈻撯枔鈻撯枔鈻撯枓鈻戔枒鈻戔枓鈻撯枔
+                  鈻掆枔鈻撯枔鈻掆枒鈻戔枒鈻掆枔鈻撯枓鈻戔枒鈻戔枓鈻撯枔鈻撯枓
+                     鈻掆枔鈻撯枔鈻掆枒鈻戔枒鈻戔枓鈻撯枔鈻撯枓
+                        鈻掆枓鈻撯枔鈻撯枔鈻掆枓
+
+
+                Welcome to Metro v0.83.3
+              Fast - Scalable - Integrated
+
+
+node.exe : [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data
+, please update: `npm i baseline-browser-mapping@latest -D`
+所在位置 行:445 字符: 211
++ ... | Out-Null; & 'C:\Program Files\nodejs\node.exe' node_modules\react-n ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([baseline-brows...ping@latest -D`:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+LOG:Writing bundle output to: android\app\build\bundletest\index.android.bundle
+Copying 50 asset files
+LOG:Done writing bundle output
+Done copying assets
+EXIT=0
+bundle exists: True
+bundle MB: 17.74

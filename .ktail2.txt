@@ -1,0 +1,55 @@
+﻿> Task :react-native-screens:generateReleaseResValues
+> Task :react-native-screens:generateReleaseResources
+> Task :react-native-screens:packageReleaseResources
+> Task :react-native-share:generateReleaseResValues
+> Task :react-native-share:generateReleaseResources
+> Task :react-native-share:packageReleaseResources
+> Task :react-native-svg:generateReleaseResValues
+> Task :react-native-svg:generateReleaseResources
+> Task :react-native-svg:packageReleaseResources
+> Task :react-native-vector-icons:generateReleaseResValues
+> Task :react-native-vector-icons:generateReleaseResources
+> Task :react-native-vector-icons:packageReleaseResources
+> Task :react-native-vision-camera:generateReleaseResValues
+> Task :react-native-vision-camera:generateReleaseResources
+> Task :react-native-vision-camera:packageReleaseResources
+> Task :react-native-webview:generateReleaseResValues
+> Task :react-native-webview:generateReleaseResources
+> Task :react-native-webview:packageReleaseResources
+> Task :react-native-worklets:generateReleaseResValues
+> Task :react-native-worklets:generateReleaseResources
+> Task :react-native-worklets:packageReleaseResources
+> Task :app:mapProdReleaseSourceSetPaths FAILED
+
+[Incubating] Problems report is available at: file:///D:/PocketPal/android/build/reports/problems/problems-report.html
+
+gradle.bat : 
+所在位置 行:445 字符: 451
++ ... radle.bat'; & $g :app:compileProdReleaseKotlin -x createBundleProdRel ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:mapProdReleaseSourceSetPaths'.
+> Error while evaluating property 'allGeneratedRes' of task ':app:mapProdReleaseSourceSetPaths'.
+   > Failed to calculate the value of task ':app:mapProdReleaseSourceSetPaths' property 'allGeneratedRes'.
+      > Querying the mapped value of map(flatmap(provider(task 'createBundleProdReleaseJsAndAssets', class com.facebook
+.react.tasks.BundleHermesCTask))) before task ':app:createBundleProdReleaseJsAndAssets' has completed is not supported
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.0.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 2m 56s
+201 actionable tasks: 103 executed, 98 up-to-date
+EXIT=1

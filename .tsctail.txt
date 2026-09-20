@@ -1,0 +1,61 @@
+﻿lines: 334
+src/services/search/providers/__tests__/tavily.test.ts(64,12): error TS2304: Cannot find name 'global'.
+src/services/search/providers/__tests__/tavily.test.ts(68,6): error TS2304: Cannot find name 'global'.
+src/services/talents/__tests__/pact-cleanup.test.ts(11,21): error TS2307: Cannot find module 'fs' or its corresponding type declarations.
+src/services/talents/__tests__/pact-cleanup.test.ts(12,23): error TS2307: Cannot find module 'path' or its corresponding type declarations.
+src/services/talents/__tests__/pact-cleanup.test.ts(221,31): error TS2304: Cannot find name '__dirname'.
+src/services/talents/readUrlAllowlist.ts(19,14): error TS2339: Property 'protocol' does not exist on type 'URL'.
+src/services/talents/readUrlAllowlist.ts(19,45): error TS2339: Property 'protocol' does not exist on type 'URL'.
+src/services/talents/readUrlAllowlist.ts(22,10): error TS2339: Property 'hash' does not exist on type 'URL'.
+src/services/talents/ReadUrlEngine.ts(19,14): error TS2339: Property 'protocol' does not exist on type 'URL'.
+src/services/talents/ReadUrlEngine.ts(19,45): error TS2339: Property 'protocol' does not exist on type 'URL'.
+src/services/talents/ReadUrlEngine.ts(22,14): error TS2339: Property 'username' does not exist on type 'URL'.
+src/services/talents/ReadUrlEngine.ts(22,33): error TS2339: Property 'password' does not exist on type 'URL'.
+src/services/talents/ReadUrlEngine.ts(25,17): error TS2339: Property 'hostname' does not exist on type 'URL'.
+src/services/talents/ReadUrlEngine.ts(70,15): error TS2339: Property 'hash' does not exist on type 'URL'.
+src/services/tts/engines/supertonic/__tests__/SupertonicEngine.test.ts(27,8): error TS2307: Cannot find module '../../../../../../__mocks__/external/@pocketpalai/react-native-speech' or its corresponding type declarations.
+src/services/tts/engines/supertonic/__tests__/SupertonicEngine.test.ts(340,45): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/services/tts/engines/system/__tests__/SystemEngine.test.ts(11,8): error TS2307: Cannot find module '../../../../../../__mocks__/external/@pocketpalai/react-native-speech' or its corresponding type declarations.
+src/services/tts/engines/system/__tests__/SystemEngine.test.ts(22,41): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/HFStore.test.ts(139,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/HFStore.test.ts(141,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/ModelStore.localModelPath.test.ts(271,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/ModelStore.test.ts(965,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/ModelStore.test.ts(1036,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/ModelStore.test.ts(1311,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/ModelStore.test.ts(1334,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/ModelStore.test.ts(2303,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/ModelStore.test.ts(3672,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/ModelStore.test.ts(3704,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/ModelStore.test.ts(3731,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/ModelStore.test.ts(3756,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/PalStore.test.ts(139,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/PalStore.test.ts(156,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/PalStore.test.ts(179,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/PalStore.test.ts(204,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/PalStore.test.ts(216,26): error TS2304: Cannot find name 'global'.
+src/store/__tests__/PalStore.test.ts(222,8): error TS2304: Cannot find name 'global'.
+src/store/__tests__/PalStore.test.ts(232,8): error TS2304: Cannot find name 'global'.
+src/store/__tests__/PalStore.test.ts(295,8): error TS2304: Cannot find name 'global'.
+src/store/__tests__/SearchProviderStore.test.ts(15,57): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/__tests__/TTSStore.test.ts(167,51): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/ChatSessionStore.ts(626,35): error TS2503: Cannot find namespace 'NodeJS'.
+src/store/CheckoutFlowStore.ts(47,22): error TS2339: Property 'hostname' does not exist on type 'URL'.
+src/store/CheckoutFlowStore.ts(48,55): error TS2339: Property 'hostname' does not exist on type 'URL'.
+src/store/CheckoutFlowStore.ts(57,13): error TS2339: Property 'protocol' does not exist on type 'URL'.
+src/store/CheckoutFlowStore.ts(236,26): error TS2339: Property 'pathname' does not exist on type 'URL'.
+src/store/CheckoutFlowStore.ts(237,15): error TS2339: Property 'hostname' does not exist on type 'URL'.
+src/store/CheckoutFlowStore.ts(269,20): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/ModelStore.ts(2265,49): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/store/ModelStore.ts(2775,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/theme/tokens/__tests__/invariants.test.ts(28,21): error TS2307: Cannot find module 'fs' or its corresponding type declarations.
+src/theme/tokens/__tests__/invariants.test.ts(29,23): error TS2307: Cannot find module 'path' or its corresponding type declarations.
+src/theme/tokens/__tests__/invariants.test.ts(31,23): error TS2304: Cannot find name '__dirname'.
+src/utils/__tests__/ggufFixture.ts(78,36): error TS2304: Cannot find name 'TextEncoder'.
+src/utils/__tests__/ggufFixture.ts(80,18): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+src/utils/__tests__/ggufHeader.test.ts(135,22): error TS2304: Cannot find name 'TextEncoder'.
+src/utils/__tests__/ggufHeader.test.ts(157,5): error TS2578: Unused '@ts-expect-error' directive.
+src/utils/__tests__/mtp.test.ts(132,27): error TS2304: Cannot find name 'TextEncoder'.
+src/utils/network.ts(24,31): error TS2339: Property 'hostname' does not exist on type 'URL'.
+src/utils/serverTypes.ts(38,22): error TS2339: Property 'hostname' does not exist on type 'URL'.
+EXIT=2

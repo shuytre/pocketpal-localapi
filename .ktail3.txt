@@ -1,0 +1,60 @@
+﻿w: file:///D:/PocketPal/node_modules/react-native-vision-camera/android/src/main/java/com/mrousavy/camera/react/CameraViewManager.kt:42:61 'object MapBuilder : Any' is deprecated. Use Kotlin's built-in collections extensions.
+w: file:///D:/PocketPal/node_modules/react-native-vision-camera/android/src/main/java/com/mrousavy/camera/react/CameraViewManager.kt:43:47 'object MapBuilder : Any' is deprecated. Use Kotlin's built-in collections extensions.
+w: file:///D:/PocketPal/node_modules/react-native-vision-camera/android/src/main/java/com/mrousavy/camera/react/CameraViewModule.kt:72:112 'val DEFAULT: Int' is deprecated. UIManagerType.DEFAULT will be deleted in the next release of React Native. Use [LEGACY] instead.
+
+> Task :react-native-vision-camera:compileDebugJavaWithJavac
+> Task :react-native-screens:compileDebugJavaWithJavac
+> Task :react-native-vision-camera:bundleLibCompileToJarDebug
+> Task :react-native-screens:bundleLibCompileToJarDebug
+> Task :app:kaptGenerateStubsProdDebugKotlin
+> Task :app:kaptProdDebugKotlin
+
+> Task :app:compileProdDebugKotlin
+e: file:///D:/PocketPal/android/app/src/main/java/com/pocketpalai/localapi/LocalApiServerModule.kt:28:1 Class 'LocalApi
+ServerModule' is not abstract and does not implement abstract base class members:
+fun pushFinish(requestId: String!, finishReason: String!, promptTokens: Double, completionTokens: Double, promise: Prom
+ise!): Unit
+fun pushError(requestId: String!, status: Double, message: String!, promise: Promise!): Unit
+e: file:///D:/PocketPal/android/app/src/main/java/com/pocketpalai/localapi/LocalApiServerModule.kt:167:3 'pushFinish' o
+verrides nothing. Potential signatures for overriding:
+fun pushFinish(requestId: String!, finishReason: String!, promptTokens: Double, completionTokens: Double, promise: Prom
+ise!): Unit
+e: file:///D:/PocketPal/android/app/src/main/java/com/pocketpalai/localapi/LocalApiServerModule.kt:187:3 'pushError' ov
+errides nothing. Potential signatures for overriding:
+fun pushError(requestId: String!, status: Double, message: String!, promise: Promise!): Unit
+e: file:///D:/PocketPal/android/app/src/main/java/com/pocketpalai/perf/PerfTuneModule.kt:19:35 Unresolved reference 'Co
+untDownLatch'.
+e: file:///D:/PocketPal/android/app/src/main/java/com/pocketpalai/perf/PerfTuneModule.kt:270:17 Unresolved reference 'C
+ountDownLatch'.
+e: file:///D:/PocketPal/android/app/src/main/java/com/pocketpalai/perf/PerfTuneModule.kt:565:17 Unresolved reference 'C
+ountDownLatch'.
+e: file:///D:/PocketPal/android/app/src/main/java/com/pocketpalai/perf/PerfTuneModule.kt:850:29 Argument type mismatch:
+ actual type is 'String?', but 'String' was expected.
+
+> Task :app:compileProdDebugKotlin FAILED
+
+[Incubating] Problems report is available at: file:///D:/PocketPal/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileProdDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCo
+mpilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.0.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 7m 59s
+513 actionable tasks: 415 executed, 98 up-to-date
+EXIT=1

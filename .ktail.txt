@@ -1,0 +1,50 @@
+﻿transform[stderr]: [13904:000001753C39C000]   253602 ms: Mark-Compact 1986.9 (2036.4) -> 1986.9 (2036.7) MB, pooled: 0 MB, 2374.96 / 0.00 ms  (average mu = 0.128, current mu = 0.075) allocation failure; GC in old space requested
+transform[stderr]: 
+transform[stderr]: 
+transform[stderr]: <--- JS stacktrace --->
+transform[stderr]: 
+transform[stderr]: FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+transform[stderr]: ----- Native stack trace -----
+transform[stderr]: 
+transform[stderr]:  1: 00007FF641393587 node::SetCppgcReference+21127
+transform[stderr]:  2: 00007FF6412F3A5B v8::base::CPU::num_virtual_address_bits+102587
+transform[stderr]:  3: 00007FF641EFCCD1 v8::Isolate::ReportExternalAllocationLimitReached+65
+transform[stderr]:  4: 00007FF641EE9786 v8::Function::Experimental_IsNopFunction+3302
+transform[stderr]:  5: 00007FF641D45ED0 v8::internal::StrongRootAllocatorBase::StrongRootAllocatorBase+33904
+transform[stderr]:  6: 00007FF641D4255A v8::internal::StrongRootAllocatorBase::StrongRootAllocatorBase+19194
+transform[stderr]:  7: 00007FF641D58AFC v8::Isolate::GetHeapProfiler+8012
+transform[stderr]:  8: 00007FF641D5937A v8::Isolate::GetHeapProfiler+10186
+transform[stderr]:  9: 00007FF641D69D7B v8::Isolate::GetHeapProfiler+78283
+transform[stderr]: 10: 00007FF641A36B58 v8::base::AddressSpaceReservation::AddressSpaceReservation+323768
+transform[stderr]: 11: 00007FF641FB870E v8::PropertyDescriptor::writable+727662
+transform[stderr]: 12: 00007FF5C2C7DF88 
+Error: Jest worker ran out of memory and crashed
+error node_modules\phonemize\dist\en-g2p.cjs: Jest worker ran out of memory and crashed.
+    at ChildProcessWorker._onExit (D:\PocketPal\node_modules\jest-worker\build\workers\ChildProcessWorker.js:321:9)
+    at ChildProcess.emit (node:events:519:28)
+
+> Task :app:createBundleProdReleaseJsAndAssets FAILED
+
+[Incubating] Problems report is available at: file:///D:/PocketPal/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:createBundleProdReleaseJsAndAssets'.
+> Process 'command 'cmd'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.0.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 8m 29s
+102 actionable tasks: 39 executed, 63 up-to-date
+EXIT=1
