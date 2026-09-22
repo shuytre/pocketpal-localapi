@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK (Cached)
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
 
     steps:
       - name: Checkout code
@@ -18,11 +19,21 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'yarn'
+
+      - name: Cache Android SDK
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/lib/android/sdk
+          key: android-sdk-${{ runner.os }}-ndk27.3.13750724-cmake3.22.1
+          restore-keys: |
+            android-sdk-${{ runner.os }}-
 
       - name: Setup Android SDK and NDK
         uses: android-actions/setup-android@v3
@@ -30,7 +41,37 @@ jobs:
           packages: 'platform-tools platforms;android-36 build-tools;36.0.0 ndk;27.3.13750724 cmake;3.22.1'
 
       - name: Create placeholder google-services.json
-        run: touch android/app/google-services.json
+        run: |
+          cat > android/app/google-services.json << 'EOF'
+          {
+            "project_info": {
+              "project_number": "123456789000",
+              "project_id": "pocketpal-placeholder"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:123456789000:android:1234567890abcdef",
+                  "android_client_info": {
+                    "package_name": "com.pocketpalai"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "AIzaSyPlaceholderKeyPlaceholderKey"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
 
       - name: Fix permission for shell scripts
         run: chmod +x ./scripts/*.sh
@@ -44,6 +85,7 @@ jobs:
       - name: Build Release APK
         env:
           NODE_OPTIONS: --max-old-space-size=4096
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.daemon=false"
         run: |
           cd android
           ./gradlew assembleProdRelease -PreactNativeArchitectures=arm64-v8a
