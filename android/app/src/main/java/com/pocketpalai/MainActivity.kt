@@ -7,6 +7,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnable
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 import com.facebook.react.uimanager.DisplayMetricsHolder
 import androidx.core.view.WindowCompat   // for edge-to-edge pre API 35
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
@@ -17,7 +18,7 @@ class MainActivity : ReactActivity() {
    * Returns the name of the main component registered from JavaScript. This is used to schedule
    * rendering of the component.
    */
-  override fun getMainComponentName(): String = "PocketPal"
+  override fun getMainComponentName(): String = "TwinCore"
 
   /**
    * Returns the instance of the [ReactActivityDelegate]. We use [DefaultReactActivityDelegate]
@@ -27,6 +28,10 @@ class MainActivity : ReactActivity() {
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
 
   override fun onCreate(savedInstanceState: Bundle?) {
+      // TwinCore：Android 12+ SplashScreen → AppTheme 的正式交接。
+      // 必须在 super.onCreate 之前调用；API 24-30 由 androidx 回填。
+      installSplashScreen()
+
       // Prevent react-native-screens from restoring fragments after process death
       // This fixes the "Screen fragments should never be restored" crash
       // See: https://github.com/software-mansion/react-native-screens/issues/17

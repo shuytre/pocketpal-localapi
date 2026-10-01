@@ -17,7 +17,7 @@ export const styles = ({
     contentContainer: {
       backgroundColor:
         !currentUserIsAuthor || message.type === 'image'
-          ? 'transparent' //theme.colors.secondary
+          ? theme.colors.aiBubbleBackground // TwinCore: AI 气泡实底
           : theme.colors.authorBubbleBackground,
       borderBottomLeftRadius:
         currentUserIsAuthor || roundBorder

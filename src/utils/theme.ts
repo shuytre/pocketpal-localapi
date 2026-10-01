@@ -120,9 +120,12 @@ export const buildTheme = ({
     },
     borders: {
       inputBorderRadius: 16,
-      messageBorderRadius: 15,
+      // TwinCore: 聊天气泡统一 18px 圆角。
+      messageBorderRadius: 18,
       default: 12,
     },
+    // TwinCore: 设置页卡片化 —— 全局 16px 组件圆角（Paper Card 等消费）。
+    roundness: 16,
     // Legacy fonts surface — preserved VERBATIM.
     // Components that read `theme.fonts.bodyMedium`, `theme.fonts.titleSmall`,
     // `theme.fonts.titleMediumLight`, etc., see the exact same shape and

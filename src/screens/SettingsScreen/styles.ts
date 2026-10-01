@@ -127,4 +127,43 @@ export const createStyles = (theme: Theme) =>
     segmentedButtons: {
       marginVertical: 8,
     },
+    // ---- TwinCore: 性能模式三横向卡片 ----
+    modeCards: {
+      flexDirection: 'row',
+      gap: 8,
+      marginVertical: 8,
+    },
+    modeCard: {
+      flex: 1,
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 4,
+      borderRadius: 16,
+      borderWidth: 2,
+      borderColor: 'transparent',
+      backgroundColor: theme.colors.surfaceContainerHigh,
+    },
+    modeCardSelected: {
+      borderColor: theme.colors.secondary,
+      backgroundColor: theme.colors.surfaceContainerHighest,
+    },
+    modeCardIcon: {
+      marginBottom: 6,
+    },
+    modeCardLabel: {
+      fontSize: 12,
+      color: theme.colors.onSurfaceVariant,
+      textAlign: 'center',
+    },
+    modeCardLabelSelected: {
+      color: theme.colors.secondary,
+      fontWeight: '700',
+    },
+    // ---- TwinCore: Shizuku 状态彩点（绿/黄/红） ----
+    statusDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      marginRight: 6,
+    },
   });

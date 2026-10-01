@@ -24,15 +24,16 @@ import {withOpacity, stateLayerOpacity} from '../../utils/colorUtils';
 
 import {TokenColors} from './types';
 
-// Light base colors (verbatim from src/utils/theme.ts:111-147).
-const LIGHT_PRIMARY = '#333333';
-const LIGHT_SECONDARY = '#1E4DF6';
+// Light base colors — TwinCore palette:
+//   background #F8FAFC / surface #FFFFFF / text #0F172A.
+const LIGHT_PRIMARY = '#0F172A';
+const LIGHT_SECONDARY = '#3B82F6';
 const LIGHT_TERTIARY = '#7880FF';
-const LIGHT_ERROR = '#FF653F';
-const LIGHT_BACKGROUND = '#ffffff';
-const LIGHT_ON_BACKGROUND = '#111111';
-const LIGHT_SURFACE = '#F9FAFB';
-const LIGHT_ON_SURFACE = '#333333';
+const LIGHT_ERROR = '#EF4444';
+const LIGHT_BACKGROUND = '#F8FAFC';
+const LIGHT_ON_BACKGROUND = '#0F172A';
+const LIGHT_SURFACE = '#FFFFFF';
+const LIGHT_ON_SURFACE = '#0F172A';
 const LIGHT_INVERSE_ON_SURFACE = '#fcfcfc';
 
 export const lightColors: TokenColors = {
@@ -112,7 +113,10 @@ export const lightColors: TokenColors = {
   menuDangerText: LIGHT_ERROR,
 
   // Messages
-  authorBubbleBackground: '#f2f2f2',
+  // 用户气泡：浅色下用品牌蓝的浅映射（深字可读），深色下用品牌蓝本体
+  // （正文亮字 #F1F5F9 对比 4.6:1）；AI 气泡：浅 #F1F5F9 / 深 #1A1F2E。
+  authorBubbleBackground: '#DBEAFE',
+  aiBubbleBackground: '#F1F5F9',
   receivedMessageDocumentIcon: LIGHT_PRIMARY,
   sentMessageDocumentIcon: LIGHT_ON_SURFACE,
   userAvatarImageBackground: 'transparent',
@@ -160,17 +164,16 @@ export const lightColors: TokenColors = {
   },
 };
 
-// Dark base values from canonical Figma. Where the canonical dark binding
-// differs visibly from the current dark Theme value, the current value
-// wins to avoid visual regression (tracked as a designer follow-up).
-const DARK_PRIMARY = '#DADDE6';
-const DARK_SECONDARY = '#95ABE6';
+// Dark base values — TwinCore palette:
+//   background #0A0E1A / surface #1A1F2E / text #F1F5F9.
+const DARK_PRIMARY = '#F1F5F9';
+const DARK_SECONDARY = '#3B82F6';
 const DARK_TERTIARY = '#80E6E4';
-const DARK_ERROR = '#FF653F';
-const DARK_BACKGROUND = '#000000';
-const DARK_ON_BACKGROUND = '#ffffff';
-const DARK_SURFACE = '#0E0E0E';
-const DARK_ON_SURFACE = '#E2E2E2';
+const DARK_ERROR = '#EF4444';
+const DARK_BACKGROUND = '#0A0E1A';
+const DARK_ON_BACKGROUND = '#F1F5F9';
+const DARK_SURFACE = '#1A1F2E';
+const DARK_ON_SURFACE = '#F1F5F9';
 const DARK_INVERSE_ON_SURFACE = '#333333';
 
 export const darkColors: TokenColors = {
@@ -241,7 +244,7 @@ export const darkColors: TokenColors = {
   focusStateOpacity: stateLayerOpacity.focus,
 
   // Menu
-  menuBackground: '#2a2a2a',
+  menuBackground: '#151B2B',
   menuBackgroundDimmed: withOpacity(DARK_SURFACE, 0.9),
   menuBackgroundActive: withOpacity(DARK_PRIMARY, 0.08),
   menuSeparator: withOpacity(DARK_PRIMARY, 0.5),
@@ -250,7 +253,9 @@ export const darkColors: TokenColors = {
   menuDangerText: DARK_ERROR,
 
   // Messages
-  authorBubbleBackground: '#212121',
+  // 用户气泡：品牌蓝；AI 气泡：深色 #1A1F2E（品牌 surface）。
+  authorBubbleBackground: '#3B82F6',
+  aiBubbleBackground: '#1A1F2E',
   receivedMessageDocumentIcon: DARK_PRIMARY,
   sentMessageDocumentIcon: DARK_ON_SURFACE,
   userAvatarImageBackground: 'transparent',
@@ -260,7 +265,7 @@ export const darkColors: TokenColors = {
     DARK_TERTIARY,
     DARK_ERROR,
   ],
-  searchBarBackground: 'rgba(28, 28, 30, 0.92)',
+  searchBarBackground: 'rgba(26, 31, 46, 0.92)',
 
   // Thinking bubble
   thinkingBubbleBackground: '#142e4d',

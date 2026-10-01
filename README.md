@@ -1,331 +1,146 @@
 <div align="center">
 
-<img src="src/assets/pocketpal-dark-v2.png" alt="PocketPal AI logo" width="120" />
+<img src="assets/svg/logo-primary.svg" alt="TwinCore logo" width="140" />
 
-# PocketPal AI
+# TwinCore
 
-**A private AI assistant that runs entirely on your phone.**
+**双核，双路加速 —— 为骁龙大核与 Hexagon NPU 而生的本地 AI 助手。**
 
-Chat with language models, give them a voice, and let them use tools — all on-device. No account, no cloud, no internet required.
+TwinCore 是一个完全运行在手机上的私有 AI 助手：本地大模型对话、局域网 OpenAI 兼容 API、
+CPU 大核绑定与 Hexagon NPU 加速、Shizuku 三档性能模式 —— 全部离线，无需账号、无需云端。
 
-<a href="https://pocketpal.dev/"><strong>pocketpal.dev</strong></a> ·
-<a href="#get-the-app">Get the app</a> ·
-<a href="https://pocketpal.dev/leaderboard">Leaderboard</a> ·
-<a href="https://palshub.ai/">PalsHub</a> ·
-<a href="https://github.com/a-ghorbani/pocketpal-ai/discussions">Discussions</a>
+<a href="#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B">快速开始</a> ·
+<a href="#twincore-%E6%80%A7%E8%83%BD%E6%8A%80%E6%9C%AF">性能技术</a> ·
+<a href="#%E5%B1%80%E5%9F%9F%E7%BD%91-openai-%E5%85%BC%E5%AE%B9-api">局域网 API</a> ·
+<a href="#%E6%9E%84%E5%BB%BA%E4%B8%8E%E5%8F%91%E5%B8%83">构建与发布</a>
 
-<br/>
-
-[![App Store](https://img.shields.io/badge/App_Store-Download-0D96F6?logo=apple&logoColor=white)](https://apps.apple.com/us/app/pocketpal-ai/id6502579498)
-[![Google Play](https://img.shields.io/badge/Google_Play-Get_it-414141?logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=com.pocketpalai)
-
-[![Latest release](https://img.shields.io/github/v/release/a-ghorbani/pocketpal-ai?sort=semver)](https://github.com/a-ghorbani/pocketpal-ai/releases)
-[![License: MIT](https://img.shields.io/github/license/a-ghorbani/pocketpal-ai)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/a-ghorbani/pocketpal-ai)](https://github.com/a-ghorbani/pocketpal-ai/stargazers)
-[![Open issues](https://img.shields.io/github/issues/a-ghorbani/pocketpal-ai)](https://github.com/a-ghorbani/pocketpal-ai/issues)
-[![Sponsor](https://img.shields.io/github/sponsors/a-ghorbani?logo=githubsponsors)](https://github.com/sponsors/a-ghorbani)
+[![Build APK](https://img.shields.io/github/actions/workflow/status/shuytre/pocketpal-localapi/build.yml?label=Build%20APK)](https://github.com/shuytre/pocketpal-localapi/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 </div>
 
 ---
 
-## Why PocketPal AI?
+> **Based on PocketPal AI (MIT License)** — TwinCore fork 自
+> [a-ghorbani/pocketpal-ai](https://github.com/a-ghorbani/pocketpal-ai)，
+> 遵循其 MIT 许可证。感谢上游项目与所有贡献者。
 
-Most AI apps are a thin window onto someone else's server — every message you type gets shipped off, logged, and analyzed somewhere you can't see. PocketPal flips that around: **the AI lives on your phone, and your conversations never leave it.**
+## 为什么是 TwinCore
 
-- **🔒 Private by default** — every prompt, response, and document stays on your device. Nothing is uploaded or stored on external servers.
-- **✈️ Works offline** — download a model once and it just works, with no connection and no account. On a plane, on a trail, anywhere.
-- **📱 Runs on hardware you already own** — real language models, voices, and tools, tuned to make the most of your phone's CPU, GPU, and NPU.
-- **🆓 Free and open source** — no subscription, no "pro" tier to unlock the AI. MIT-licensed and built in the open.
+中端骁龙芯片（如红米 K20 / Snapdragon 730：2×A75 大核 + 6×A55 小核）跑本地大模型时，
+系统调度器常常把推理线程摊到全部 8 个核上 —— 小核拖慢整体吞吐。TwinCore 把推理
+**钉在大核上**，并优先把算子Offload 到 **Hexagon NPU**：
 
-> **Privacy note:** The only data that ever leaves your device is what you explicitly choose to share — benchmark results (if you opt into the leaderboard) and feedback you submit through the app.
+| 能力 | 说明 |
+|---|---|
+| CPU 大核绑定 | 推理线程固定到 A75 集群（cpu6-7），实测吞吐 11.79 → 22.86 tok/s |
+| Hexagon NPU | 启用 GGML_HEXAGON / GGML_OPENCL 后端，HTP → OpenCL → CPU 回退链 |
+| Shizuku 三档性能模式 | 省电 / 均衡 / 性能：通过 Shizuku 写 cpufreq，无需 Root |
+| 局域网 OpenAI API | 手机即服务端：`/v1/chat/completions`（SSE 流式）+ `/v1/models` |
+| 品牌视觉 | 全部资产为手绘 SVG 矢量（`assets/svg/`），一套源导出全部分辨率 |
 
-## Contents
+## TwinCore 性能技术
 
-- [Features](#features)
-- [Get the app](#get-the-app)
-- [How it works](#how-it-works)
-- [Using the app](#using-the-app)
-- [For developers](#for-developers)
-- [Contributing](#contributing)
-- [Roadmap](#roadmap)
-- [Community & support](#community--support)
-- [License](#license)
+### 1. CPU 亲和性（默认生效）
 
-## Features
+`src/utils/twincore.ts` 在模型加载前注入 CPU 策略：`n_threads` 锁定大核数量，
+`n_threads_batch` 同步（batch 推理继承同一线程池）。拓扑探测自动识别大小核布局，
+非对称设备安全降级。
 
-- **🧠 On-device chat** — run GGUF language models (Gemma, Qwen, Phi, Llama, and more) fully offline.
-- **🗣️ Text-to-speech** — give your assistant a voice with on-device neural TTS (Kokoro and other engines), no cloud calls.
-- **🎭 Pals** — create personalized assistants with their own model, system prompt, and personality (Assistant and Roleplay types).
-- **🛍️ [PalsHub](https://palshub.ai/)** — discover and install community Pals, including premium ones via in-app checkout.
-- **🛠️ Talents & tools** — let capable Pals call built-in tools (calculator, date/time, rich HTML rendering) inside a tool-use loop.
-- **📥 Hugging Face integration** — search and download GGUF models, including gated ones, directly from the HF Hub with your access token.
-- **📊 Benchmarking** — measure tokens/sec and memory, and optionally compare on the [AI Phone Leaderboard](https://pocketpal.dev/leaderboard).
-- **⚡ Hardware acceleration** — CPU, GPU (Metal on iOS, OpenCL/Adreno on Android), and NPU (Qualcomm Hexagon) inference paths, with graceful fallback.
-- **🌍 Localized** — available in 11 languages, on phones and tablets, including full iPad support.
+### 2. Hexagon NPU / OpenCL（自动探测）
 
-## Get the app
+`android/app/build.gradle` 显式 `-DGGML_HEXAGON=ON -DGGML_OPENCL=ON`。加载模型时
+`devices: ['htp', 'opencl', 'cpu']` 依次尝试，失败自动回退，永不阻塞。可选原生库在
+Manifest 中声明为 `required=false`，无 NPU 设备照常安装。
 
-| Platform | |
-| --- | --- |
-| **iOS / iPadOS** | [![Download on the App Store](https://img.shields.io/badge/App_Store-Download-0D96F6?logo=apple&logoColor=white)](https://apps.apple.com/us/app/pocketpal-ai/id6502579498) |
-| **Android** | [![Get it on Google Play](https://img.shields.io/badge/Google_Play-Get_it-414141?logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=com.pocketpalai) |
+### 3. Shizuku 三档性能模式（可选）
 
-**Three steps to your first chat:**
+设置 → 性能模式。通过 [Shizuku](https://shizuku.rikka.app/) 获取 ADB 级权限后直接写
+`/sys/devices/system/cpu/*/cpufreq`：
 
-1. **Install** PocketPal from the App Store or Google Play.
-2. **Download a model** — tap the menu (☰) → **Models**, pick one that fits your phone, and download (or add one from Hugging Face).
-3. **Load it and start chatting** — that's it, you're running AI fully offline.
+| 模式 | 小核 | 大核 | 附加动作 |
+|---|---|---|---|
+| 省电 powersave | 822MHz · powersave | 822MHz · powersave | — |
+| 均衡 balanced | 1.4GHz · schedutil | 1.8GHz · schedutil | — |
+| 性能 performance | 1.8GHz · performance | 2.2GHz · performance | 唤醒两个大核、解除后台限制 |
 
-## How it works
+- 授权五态：`granted / denied / timeout / rejected_manual / binder_dead`，120s 超时
+- 写入结果逐项读回校验，返回 `applied[]` + `failures[]` 双列表，部分生效不阻塞
+- 可选「每 60 秒重新应用」对抗 MIUI/HyperOS perfd 覆写（仅前台）
+- 未授权也能选档：只记录偏好，授权后一键应用
 
-You don't need to know any of this to use PocketPal — but if you're curious how a phone runs real AI offline, here's the short version.
+> 调频是**系统级**的，对整机生效。TwinCore 只调用 Shizuku 客户端 API，
+> 不修改 Shizuku 本身，也不影响其他已授权应用。
 
-PocketPal is a four-layer stack, from the silicon up to the chat UI. Each layer has one job, and the dependency direction is strictly top-down — the JS app talks to native bridges, bridges talk to inference engines, engines target hardware backends.
+## 局域网 OpenAI 兼容 API
 
-<div align="center">
-  <img src="assets/images and logos/stack-diagram-dark.png" alt="PocketPal AI on-device stack — UI & Tool Use → Bridging → Engine → Hardware" width="100%">
-</div>
-
-| Layer | What runs here |
-| --- | --- |
-| **UI & Tool Use** | The React Native app (UI via React Native Paper, state via MobX, chat history in WatermelonDB). The **`AgentRunner`** drives each chat turn — streaming tokens, dispatching **Talents** (tools) when the model calls them, and feeding results back for follow-up reasoning. **Pals** are configurable personas; **PalsHub** is the in-app marketplace for sharing and buying them. |
-| **Bridging** | Native modules that connect JavaScript to the engines. [`llama.rn`](https://github.com/mybigday/llama.rn) bridges LLM inference over JSI; [`react-native-speech`](https://github.com/a-ghorbani/react-native-speech) and `onnxruntime-react-native` bridge text-to-speech. |
-| **Engine** | The inference engines. **llama.cpp** runs language models in the quantized **GGUF** format. **ONNX Runtime** runs TTS voice models in the **ONNX** format. |
-| **Hardware** | Where the math actually happens. PocketPal targets **CPU** (universal fallback), **GPU** (Metal on iOS, OpenCL on Qualcomm Adreno for Android), and **NPU** (Qualcomm Hexagon) — falling back gracefully and offloading partial layers when a full backend isn't available. |
-
-## Using the app
-
-<details>
-<summary><strong>📥 Download & load a model</strong></summary>
-
-<br/>
-
-1. Open the app and tap the **Menu** (☰), then go to **Models**.
-2. Pick a model from the list and tap **Download**, or tap **+** to add one from Hugging Face or local storage.
-3. From Hugging Face, search GGUF models and choose a quantization that fits your device's memory and storage — download now or bookmark for later.
-4. After downloading, tap **Load** (or use the chevron icon left of the chat input to load right from the chat screen).
-
-<img src="assets/images and logos/Download_models.png" alt="Download Models" width="100%">
-</details>
-
-<details>
-<summary><strong>💬 Chat</strong></summary>
-
-<br/>
-
-1. Make sure a model is loaded.
-2. Open the **Chat** page and start talking.
-3. The screen stays awake during inference and deactivates when idle.
-4. **Copy** a full response with the copy icon, or long-press a paragraph to copy just that.
-5. **Edit** any of your messages with a long-press — the AI regenerates from your change. Hit **retry** for a fresh answer, optionally with a different model.
-
-<img src="assets/images and logos/Chat.png" alt="Chat" width="83%">
-</details>
-
-<details>
-<summary><strong>🎭 Pals & PalsHub</strong></summary>
-
-<br/>
-
-Create personalized assistants:
-- **Assistant Pal** — pick a default model, set a system prompt (write it yourself or have the app generate one), and customize the chat input color.
-- **Roleplay Pal** — everything above, plus location, the AI's role, and other contextual parameters.
-
-Switch personas with the Pal picker on the chat page. Browse **[PalsHub](https://palshub.ai/)** in-app to discover community Pals, including premium ones via in-app checkout (US iOS & Android).
-
-<img src="assets/images and logos/Pals.png" alt="Assistant Pal" width="100%">
-<p><em>Creating a cocktail-recipe assistant</em></p>
-</details>
-
-<details>
-<summary><strong>📊 Benchmark your device</strong></summary>
-
-<br/>
-
-1. Open the **Benchmark** page.
-2. Run performance tests to compare speed and efficiency across models.
-3. Review tokens/sec and memory usage.
-4. Optionally share your results to the [AI Phone Leaderboard](https://pocketpal.dev/leaderboard).
-
-<img src="assets/images and logos/Benchmark.png" alt="Benchmark" width="100%">
-</details>
-
-<details>
-<summary><strong>🔑 Set up a Hugging Face token (for gated models)</strong></summary>
-
-<br/>
-
-1. Create an access token in your Hugging Face account ([docs](https://huggingface.co/docs/hub/en/security-tokens)).
-2. In PocketPal, go to **Settings → Set Token**, paste it, and save.
-
-<img src="assets/images and logos/Token_in_pocketpal.png" alt="Token setup" width="66%">
-</details>
-
-<details>
-<summary><strong>💌 Send feedback</strong></summary>
-
-<br/>
-
-Go to **App Info → "Sharing your thoughts"**, type your feedback — feature requests, suggestions, anything — and submit.
-
-<img src="assets/images and logos/Send_Feedback.png" alt="Send feedback" width="50%">
-</details>
-
-## For developers
-
-PocketPal is a standard React Native app. If you can build a React Native project, you can build PocketPal.
-
-### Prerequisites
-
-- **Node.js** — version is pinned in [`.nvmrc`](.nvmrc) (currently `22.21.0`); run `nvm use` to match it. Older Node will fail the `engines` check.
-- **Yarn 1 (Classic)** — `packageManager` is pinned to `yarn@1.22.22`.
-- **Xcode** + **CocoaPods**, and **Ruby + Bundler** (for iOS / Fastlane tooling).
-- **Android Studio** + Android SDK/NDK.
-
-See the [React Native environment setup](https://reactnative.dev/docs/set-up-your-environment) for platform details.
-
-### Clone, install & run
+设置 → Local API 打开开关后，手机变成一台 OpenAI 兼容服务器（默认端口 `8080`）：
 
 ```bash
-git clone https://github.com/a-ghorbani/pocketpal-ai
-cd pocketpal-ai
+# 查看已加载模型
+curl http://<手机IP>:8080/v1/models
 
-nvm use                       # match the pinned Node version
-yarn install                  # install JS dependencies
-(cd ios && pod install)       # iOS only
-
-yarn start                    # Metro bundler
-yarn ios                      # build + run on iOS simulator
-yarn android                  # build + run on Android emulator
+# 流式对话（与 OpenAI SDK / 任意 OpenAI 兼容客户端直接对接）
+curl http://<手机IP>:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "<模型名>",
+    "stream": true,
+    "messages": [{"role": "user", "content": "你好"}]
+  }'
 ```
 
-Core on-device chat works without any backend keys; only PalsHub/auth features need additional configuration.
+- 原生实现（`java.net.ServerSocket`，零第三方依赖），前台服务保活
+- SSE 流式输出，15s 心跳保活长连接
+- 端口可在设置内调整；Base URL 自动展示本机地址
 
-> **Native-change rule:** if you change `package.json`, a native module, `ios/`, `android/`, the Podfile, or `build.gradle`, re-run `pod install` and rebuild both platforms — a JS reload won't pick up native changes.
+## 快速开始
 
-### Quality gates
+### 下载预构建 APK
+
+见 [Releases](https://github.com/shuytre/pocketpal-localapi/releases) ——
+每次推送到 `main` 都会自动构建 debug APK 并附到 Release。
+
+### 从源码构建
 
 ```bash
-yarn lint           # ESLint
-yarn typecheck      # tsc --noEmit
-yarn test           # Jest
-yarn l10n:validate  # validate locale JSON (placeholders, integrity)
+git clone https://github.com/shuytre/pocketpal-localapi.git
+cd pocketpal-localapi
+yarn install
+# 从 SVG 源重新导出全部 launcher PNG（可选，已提交产物）
+yarn svg:export
+cd android && ./gradlew assembleDebug && cd ..
+# APK: android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Run `yarn lint && yarn typecheck && yarn test` before opening a PR. Commits are validated by Commitlint ([Conventional Commits](https://www.conventionalcommits.org/)) via a Husky hook.
+要求：Node ≥ 22、JDK 17、Android SDK 36 / NDK 27.3.13750724。
 
-<details>
-<summary><strong>Repository layout</strong></summary>
+## 构建与发布
 
-<br/>
+`.github/workflows/build.yml`：
+
+- **触发**：push 到 `main` 或手动（workflow_dispatch）
+- **缓存**：yarn 依赖 + Gradle wrapper/caches + Android SDK/NDK（命中后构建时间大幅缩短）
+- **并行**：Gradle `--max-workers=4`（吃满 GitHub 托管 runner 的 4 核）
+- **产物**：`app-debug.apk` 自动附加到 tag `v1.0.<run_number>` 的 GitHub Release
+
+## 项目结构（TwinCore 增量）
 
 ```
-src/
-├── screens/        # Chat, Models, Pals, Benchmark, Settings, About, …
-├── components/     # Reusable UI
-├── store/          # MobX stores (Model, ChatSession, Pal, TTS, HF, Benchmark, …)
-├── services/
-│   ├── agent/      # AgentRunner — the chat / tool loop
-│   ├── talents/    # Tool engines + registries
-│   ├── tts/        # TTS engines (kokoro, kitten, supertonic, system)
-│   ├── palshub/    # PalsHub marketplace integration
-│   └── downloads/  # Model download manager
-├── database/       # WatermelonDB schema, models, migrations
-├── repositories/   # Data-access layer over the DB
-├── locales/        # i18n JSON + lazy loader (index.ts is the registry)
-└── hooks/  api/  theme/  utils/  config/  specs/
+assets/svg/                     # 8 个手绘品牌 SVG（唯一样式源）
+scripts/export-svg.js           # SVG → 全分辨率 launcher PNG（sharp）
+src/utils/twincore.ts           # CPU 大核绑定 + NPU 回退链
+src/utils/performanceMode.ts    # 三档模式 + 降级 + 60s 重应用
+src/specs/NativeTwinCorePerf.ts # TurboModule Spec
+src/screens/SettingsScreen/
+  └─ PerformanceModeSection.tsx # Shizuku 状态面板 + 三横向档位卡片
+src/components/SplashOverlay/   # 1.8s 六段启动动画
+android/.../TwinCorePerfModule.kt        # Shizuku + cpufreq 原生实现
+android/.../localapi/                    # 局域网 OpenAI 兼容服务器
+.github/workflows/build.yml              # 缓存 + 4 核构建 + Release
 ```
-</details>
 
-<details>
-<summary><strong>Tech stack</strong></summary>
+## 许可证
 
-<br/>
-
-Versions are pinned in [`package.json`](package.json); the highlights:
-
-| Area | Choice |
-| --- | --- |
-| Framework | React Native `0.82.1`, React `19.1.1` (New Architecture) |
-| Language | TypeScript `5.0.4` |
-| UI | React Native Paper `5.14.5`, React Navigation |
-| State | MobX `6` (`mobx`, `mobx-react`, `mobx-persist-store`) |
-| Persistence | WatermelonDB (chat history), AsyncStorage (settings), Keychain (secrets) |
-| LLM | `llama.rn` `0.13.0-rc.3` → llama.cpp b10829 · GGUF |
-| TTS | `react-native-speech` `2.3.1` + `onnxruntime-react-native` `1.23.2` · ONNX |
-| Tooling | Yarn 1 (Classic), ESLint, Prettier, Jest, Husky + Commitlint |
-
-</details>
-
-<details>
-<summary><strong>Extending PocketPal</strong></summary>
-
-<br/>
-
-A **Talent** is a tool the model can call mid-conversation. Engines are registered in a `TalentRegistry`, exposed to the model as tool schemas; the `AgentRunner` detects a call, runs the engine, and returns the result for the next turn.
-
-| Talent | Engine | Does |
-| --- | --- | --- |
-| `calculate` | `CalculateEngine` | Arithmetic / expression evaluation |
-| `datetime` | `DatetimeEngine` | Current date / time |
-| `render_html` | `RenderHtmlEngine` | Renders model-produced HTML in chat |
-
-Good first contributions:
-- A new **Talent** — implement a `TalentEngine` and register it in `src/services/talents/`.
-- A new **TTS engine** — add it under `src/services/tts/engines/`.
-- A new **locale** — add a JSON file in `src/locales/` (or translate on [Weblate](https://hosted.weblate.org/projects/pocketpal-ai/)).
-
-</details>
-
-## Contributing
-
-Contributions are welcome — bug reports, fixes, features, translations, and docs all help.
-
-1. Fork and branch: `git checkout -b feature/your-feature-name`
-2. Make your changes; run on a device/emulator (`yarn ios` / `yarn android`). Re-run `pod install` + rebuild if you touched native code.
-3. Gate locally: `yarn lint && yarn typecheck && yarn test`
-4. Commit with [Conventional Commits](https://www.conventionalcommits.org/): `git commit -m "feat: add new talent"`
-5. Push and open a pull request.
-
-Please read the [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) first. Want to translate PocketPal into your language? Join us on [Weblate](https://hosted.weblate.org/projects/pocketpal-ai/).
-
-## Roadmap
-
-- **Tool use expansion** — grow the Talents catalog and deepen the agentic loop so Pals can do more, fully on-device.
-
-Have an idea or found a bug? [Open an issue](https://github.com/a-ghorbani/pocketpal-ai/issues/new/choose) or start a [discussion](https://github.com/a-ghorbani/pocketpal-ai/discussions).
-
-## Community & support
-
-- 💬 **Questions & ideas** — [GitHub Discussions](https://github.com/a-ghorbani/pocketpal-ai/discussions)
-- 🐛 **Bugs & requests** — [GitHub Issues](https://github.com/a-ghorbani/pocketpal-ai/issues/new/choose)
-- 🌐 **Website** — [pocketpal.dev](https://pocketpal.dev/)
-- ❤️ **Support development** — PocketPal is free and ad-free; [sponsoring](https://github.com/sponsors/a-ghorbani) helps keep it that way.
-
-## License
-
-Licensed under the [MIT License](LICENSE).
-
-## Acknowledgements
-
-PocketPal AI stands on the shoulders of the open-source community, including:
-
-- **[llama.cpp](https://github.com/ggerganov/llama.cpp)** — efficient on-device LLM inference.
-- **[llama.rn](https://github.com/mybigday/llama.rn)** — llama.cpp bindings for React Native.
-- **[react-native-speech](https://github.com/a-ghorbani/react-native-speech)** — React Native TTS bridge powering on-device voices.
-- **[ONNX Runtime](https://onnxruntime.ai/)** — cross-platform inference engine powering on-device TTS.
-- **[React Native](https://reactnative.dev/)**, **[MobX](https://mobx.js.org/)**, **[React Native Paper](https://callstack.github.io/react-native-paper/)**, **[React Navigation](https://reactnavigation.org/)**, **[WatermelonDB](https://github.com/Nozbe/WatermelonDB)**, and many other open-source libraries that make this project possible.
-
-<div align="center">
-<br/>
-
-Made with ❤️ for people who want AI that stays on their phone.
-
-<br/>
-
-<sub>If PocketPal is useful to you, consider giving it a ⭐ — it helps others find the project.</sub>
-
-</div>
-# pocketpal-localapi
-# pocketpal-localapi
+MIT。基于 [PocketPal AI](https://github.com/a-ghorbani/pocketpal-ai)（MIT License）构建，
+品牌与性能相关改动版权归各自作者。

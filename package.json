@@ -1,5 +1,5 @@
 {
-  "name": "PocketPal",
+  "name": "twincore",
   "version": "1.17.3",
   "private": true,
   "scripts": {
@@ -25,7 +25,8 @@
     "format": "prettier --write \"**/*.{js,ts,tsx,json,md}\"",
     "start": "react-native start",
     "start:reset": "react-native start --reset-cache",
-    "test": "jest"
+    "test": "jest",
+    "svg:export": "node scripts/export-svg.js"
   },
   "dependencies": {
     "@dr.pogodin/react-native-fs": "^2.36.0",
@@ -53,6 +54,7 @@
     "dayjs": "^1.11.18",
     "expr-eval": "^2.0.2",
     "llama.rn": "0.13.0-rc.3",
+    "lucide-react-native": "^1.49.0",
     "marked": "^16.4.0",
     "mobx": "^6.15.0",
     "mobx-persist-store": "^1.1.8",
@@ -127,10 +129,11 @@
     "react-native-dotenv": "^3.4.11",
     "react-native-svg-transformer": "^1.5.1",
     "react-test-renderer": "19.1.1",
+    "sharp": "^0.35.5",
     "typescript": "5.0.4"
   },
   "engines": {
-    "node": ">=22.21.0"
+    "node": ">=22.0.0"
   },
   "packageManager": "yarn@1.22.22",
   "codegenConfig": {

@@ -34,6 +34,7 @@ import {
   HubRunSheetHost,
 } from './src/components';
 import {MarkdownProvider} from './src/components/MarkdownView';
+import {SplashOverlay} from './src/components/SplashOverlay';
 import {AutomationBridge, BenchmarkRunnerScreen} from './src/__automation__';
 import {bootstrapPerformanceMode} from './src/services/perfTune/bootstrapPerformanceMode';
 import {
@@ -112,6 +113,8 @@ const App = observer(() => {
   return (
     <GestureHandlerRootView style={styles.root}>
       {__E2E__ ? <AutomationBridge /> : null}
+      {/* TwinCore：1.8s 六段品牌启动动画（Android only；E2E 跳过，点击可跳过） */}
+      {__E2E__ ? null : <SplashOverlay />}
       <SafeAreaProvider>
         <KeyboardProvider statusBarTranslucent navigationBarTranslucent>
           <PaperProvider theme={theme}>

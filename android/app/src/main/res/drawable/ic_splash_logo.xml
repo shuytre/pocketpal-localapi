@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TwinCore splash icon — vector twin of assets/svg/ic_launcher_foreground.svg.
+     图形整体缩到 78% 并居中：系统会把 animatedIcon 裁进圆形区域，留边防止
+     轨道环被裁。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <group
+        android:translateX="56.5"
+        android:translateY="56.5"
+        android:scaleX="0.78"
+        android:scaleY="0.78">
+
+        <!-- Dual lanes (CPU + NPU) -->
+        <path
+            android:pathData="M286,256 L430,256"
+            android:strokeColor="#00E5A0"
+            android:strokeWidth="16"
+            android:strokeLineCap="round"/>
+        <path
+            android:pathData="M226,256 L82,256"
+            android:strokeColor="#00E5A0"
+            android:strokeWidth="16"
+            android:strokeLineCap="round"/>
+
+        <!-- Orbit ring (twin gaps left/right) -->
+        <path
+            android:pathData="M94.9,163 A186,186 0 0 1 417.1,163"
+            android:strokeColor="#3B82F6"
+            android:strokeWidth="24"
+            android:strokeLineCap="round"
+            android:fillColor="#00000000"/>
+        <path
+            android:pathData="M417.1,349 A186,186 0 0 1 94.9,349"
+            android:strokeColor="#3B82F6"
+            android:strokeWidth="24"
+            android:strokeLineCap="round"
+            android:fillColor="#00000000"/>
+
+        <!-- Performance core (top) -->
+        <path
+            android:pathData="M204,112 L308,112 A28,28 0 0 1 336,140 L336,192 A28,28 0 0 1 308,220 L204,220 A28,28 0 0 1 176,192 L176,140 A28,28 0 0 1 204,112 Z"
+            android:fillColor="#00E5A0"/>
+        <!-- Thread slots -->
+        <path
+            android:pathData="M212.5,152.5 L299.5,152.5"
+            android:strokeColor="#800A0E1A"
+            android:strokeWidth="13"
+            android:strokeLineCap="round"/>
+        <path
+            android:pathData="M212.5,178.5 L267.5,178.5"
+            android:strokeColor="#800A0E1A"
+            android:strokeWidth="13"
+            android:strokeLineCap="round"/>
+
+        <!-- Efficiency core (bottom) -->
+        <path
+            android:pathData="M204,292 L308,292 A28,28 0 0 1 336,320 L336,372 A28,28 0 0 1 308,400 L204,400 A28,28 0 0 1 176,372 L176,320 A28,28 0 0 1 204,292 Z"
+            android:fillColor="#3B82F6"/>
+        <path
+            android:pathData="M212.5,332.5 L299.5,332.5"
+            android:strokeColor="#800A0E1A"
+            android:strokeWidth="13"
+            android:strokeLineCap="round"/>
+        <path
+            android:pathData="M212.5,358.5 L267.5,358.5"
+            android:strokeColor="#800A0E1A"
+            android:strokeWidth="13"
+            android:strokeLineCap="round"/>
+
+        <!-- Bridge -->
+        <path
+            android:pathData="M256,224 L256,234 M256,278 L256,288"
+            android:strokeColor="#F1F5F9"
+            android:strokeWidth="16"
+            android:strokeLineCap="round"/>
+
+        <!-- NPU node (hollow diamond) -->
+        <path
+            android:pathData="M256,226 L286,256 L256,286 L226,256 Z"
+            android:fillColor="#F1F5F9"/>
+        <path
+            android:pathData="M256,243 L269,256 L256,269 L243,256 Z"
+            android:fillColor="#0A0E1A"/>
+    </group>
+</vector>

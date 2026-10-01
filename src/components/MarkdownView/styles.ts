@@ -27,19 +27,20 @@ export const createTagsStyles = (theme: Theme) => ({
   },
   code: {
     fontFamily: 'Courier', // Change the font for code snippets
-    backgroundColor: theme.colors.surface, // Custom background for code blocks
+    // TwinCore: 代码块统一 GitHub-Dark 底（两种主题下都深底渲染）。
+    backgroundColor: '#0D1117',
     padding: 4,
     borderRadius: 4,
-    color: theme.colors.onSurface, // Color for code text
+    color: '#E6EDF3', // Color for code text
     fontSize: 12,
     whiteSpace: 'pre' as const,
   },
   pre: {
-    backgroundColor: theme.colors.surface, // Background for pre blocks
+    backgroundColor: '#0D1117', // TwinCore: GitHub-Dark code block
     padding: 8,
     borderRadius: 6,
     marginVertical: 8,
-    color: theme.colors.onPrimaryContainer,
+    color: '#E6EDF3',
     fontFamily: 'Courier',
     fontSize: 14,
     whiteSpace: 'pre' as const,
@@ -80,7 +81,7 @@ export const createStyles = (theme: Theme) =>
       fontFamily: 'Courier',
     },
     codeHighlighterScrollContent: {
-      backgroundColor: theme.colors.surface,
+      backgroundColor: '#0D1117',
       padding: 8,
       borderRadius: 6,
       marginTop: 4,

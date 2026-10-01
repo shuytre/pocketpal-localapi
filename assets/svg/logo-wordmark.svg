@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -14 920 148" role="img" aria-label="TwinCore wordmark">
+  <!-- TwinCore wordmark — hand-drawn monoline caps, stroke 22 -->
+  <g fill="none" stroke="#0A0E1A" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+    <!-- T -->
+    <path d="M0 0 H90 M45 0 V120"/>
+    <!-- W -->
+    <path d="M135 0 L154 120 L179 42 L204 120 L223 0"/>
+    <!-- I -->
+    <path d="M279 0 V120"/>
+    <!-- N -->
+    <path d="M335 120 V0 L409 120 V0"/>
+    <!-- C -->
+    <path d="M540 22 A54 54 0 1 0 540 98"/>
+    <!-- O -->
+    <circle cx="633" cy="60" r="49"/>
+    <!-- R -->
+    <path d="M727 120 V0 H765 A31 31 0 0 1 765 62 H727 M765 62 L795 120"/>
+    <!-- E -->
+    <path d="M920 0 H851 V120 H920 M851 60 H902"/>
+  </g>
+</svg>

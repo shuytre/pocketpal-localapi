@@ -98,7 +98,7 @@ export const AboutScreen: React.FC = () => {
           <View style={styles.header}>
             <View style={styles.headerContent}>
               <Text variant="titleLarge" style={styles.title}>
-                PocketPal AI
+                TwinCore
               </Text>
               <Text variant="bodyMedium" style={styles.description}>
                 {l10n.about.description}
@@ -120,6 +120,14 @@ export const AboutScreen: React.FC = () => {
               <Text style={styles.llamaBuildText}>
                 llama.cpp {BuildInfo.number} ({BuildInfo.commit.substring(0, 7)}
                 )
+              </Text>
+              {/* TwinCore：保留上游致谢（MIT 要求）。 */}
+              <Text
+                style={styles.llamaBuildText}
+                onPress={() =>
+                  Linking.openURL('https://github.com/a-ghorbani/pocketpal-ai')
+                }>
+                Based on PocketPal AI (MIT License)
               </Text>
             </View>
           </View>

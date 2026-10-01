@@ -6,4 +6,14 @@
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
     </style>
 
+    <!-- TwinCore 启动屏（Android 12+ SplashScreen API）。
+         深底 #0A0E1A + 居中品牌图形；duration 不在此声明 —— 1.8s 的六段
+         入场序列由 RN 侧 reanimated 承接，系统层只负责「无白屏冷启动」。
+         API 24-30 由 androidx core-splashscreen 回填同样外观。 -->
+    <style name="AppTheme.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#0A0E1A</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="postSplashScreenTheme">@style/AppTheme</item>
+    </style>
+
 </resources>

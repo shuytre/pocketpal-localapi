@@ -92,6 +92,7 @@ export interface TokenColors {
 
   // Messages
   authorBubbleBackground: string;
+  aiBubbleBackground: string;
   receivedMessageDocumentIcon: string;
   sentMessageDocumentIcon: string;
   userAvatarImageBackground: string;

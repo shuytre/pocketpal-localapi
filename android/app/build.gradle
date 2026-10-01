@@ -87,7 +87,10 @@ android {
 
     namespace "com.pocketpal"
     defaultConfig {
-        applicationId "com.pocketpalai"
+        // TwinCore: 品牌重塑后的应用包名。namespace 保留 com.pocketpal ——
+        // RN 0.82 的 codegen（PocketPalSpecs）与既有 Kotlin 包结构都锚定在
+        // 这个 namespace 上，改它牵动面太大且无用户可见收益。
+        applicationId "com.twincore"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 147
@@ -103,6 +106,17 @@ android {
             // shim) into libappmodules.so. The replacement file must
             // include ReactNative-application.cmake — see jni/CMakeLists.txt.
             path file("src/main/jni/CMakeLists.txt")
+
+            // TwinCore: 显式声明后端开关。
+            // 注意这两个 -D 只作用于本模块的 libappmodules.so —— CMake 对未被
+            // 引用的变量是惰性的，不写也不报错，写了也不影响 llama.rn。
+            // llama.rn 的 Hexagon / OpenCL 是否真正编进去由它自己的 CMake 决定：
+            //   · 预编译产物（rnllamaBuildFromSource=false，默认）里已包含
+            //     librnllama_v8_2_dotprod_i8mm_hexagon_opencl.so；
+            //   · 改为从源码编译时需要 HEXAGON_SDK_ROOT(6.4.0.2)，
+            //     否则只会得到纯 CPU 构建。
+            // 详见 android/gradle.properties 中的说明。
+            arguments "-DGGML_HEXAGON=ON", "-DGGML_OPENCL=ON"
         }
     }
     signingConfigs {
@@ -172,7 +186,7 @@ android {
         e2e {
             dimension "distribution"
             applicationIdSuffix ".e2e"
-            // Effective applicationId: com.pocketpalai.e2e
+            // Effective applicationId: com.twincore.e2e
             // Separate sandbox; installs side-by-side with prod.
         }
     }
@@ -236,6 +250,21 @@ dependencies {
 
     // OkHttp for DownloadModule (network requests)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // Shizuku —— TwinCore 三档性能模式靠它拿到 ADB/Root 级别的权限，
+    // 才能写 /sys/devices/system/cpu/*/cpufreq。
+    //   api      : 运行时调用（pingBinder / requestPermission / newProcess）
+    //   provider : Manifest 里注册的 ShizukuProvider，Shizuku 服务用它识别本应用
+    // 注意：这两个库都是纯 Java，不影响 abiFilters（arm64-v8a / x86_64）。
+    def shizuku_version = "13.1.5"
+    implementation "dev.rikka.shizuku:api:$shizuku_version"
+    implementation "dev.rikka.shizuku:provider:$shizuku_version"
+
+    // TwinCore —— Android 12+ SplashScreen API 的兼容层。
+    // API 31+ 走系统原生 splash 主题；API 24-30 由 androidx 回填同样的
+    // 「纯色背景 + 居中 icon」启动屏（windowSplashScreen* 属性在旧系统上
+    // 被 core-splashscreen 映射为 windowBackground fullscreen drawable）。
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }
 
 project.ext.vectoricons = [
