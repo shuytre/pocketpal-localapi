@@ -39,7 +39,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'yarn'
+
+      # 仓库不提交 yarn.lock（CI 端 yarn install 现场解析），而 setup-node
+      # 的 yarn 缓存强依赖 lockfile 存在，故改用 actions/cache 缓存全局包缓存
+      - name: Cache yarn packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/yarn
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-
 
       # —— 缓存层 1/3：Android SDK + NDK（体量最大，命中可省 ~6 分钟） ——
       - name: Cache Android SDK
@@ -62,7 +71,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('android/*.gradle', 'android/**/*.gradle', 'android/gradle.properties', 'yarn.lock') }}
+          key: gradle-${{ runner.os }}-${{ hashFiles('android/*.gradle', 'android/**/*.gradle', 'android/gradle.properties') }}
           restore-keys: |
             gradle-${{ runner.os }}-
 
@@ -103,7 +112,7 @@ jobs:
         run: chmod +x ./scripts/*.sh
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       # TwinCore：launcher PNG 不进 git —— 从 assets/svg/ 唯一样式源实时导出
       # （mdpi 48 / hdpi 72 / xhdpi 96 / xxhdpi 144 / xxxhdpi 192 + adaptive 108dp）。
@@ -121,7 +130,7 @@ jobs:
           GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.daemon=false"
         run: |
           cd android
-          ./gradlew assembleDebug \
+          ./gradlew assembleProdDebug \
             --max-workers=4 \
             --build-cache \
             -PreactNativeArchitectures=arm64-v8a
@@ -147,7 +156,7 @@ jobs:
             **安装**：下载 app-debug.apk → 允许安装未知来源 → 安装。
             包名 `com.twincore`，与 PocketPal 官方版可并存。
 
-            构建：`assembleDebug`（arm64-v8a）· JDK 17 · Gradle 4-worker 并行。
+            构建：`assembleProdDebug`（arm64-v8a）· JDK 17 · Gradle 4-worker 并行。
           files: dist/app-debug.apk
           fail_on_unmatched_files: true
 
