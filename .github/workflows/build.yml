@@ -136,23 +136,14 @@ jobs:
             --build-cache \
             -PreactNativeArchitectures=arm64-v8a 2>&1 | tee /tmp/gradle-build.log
 
-      # —— 失败诊断闭环：把 Gradle 日志尾部推到 ci-diagnosis 分支，供离线读取 ——
-      - name: Push build log tail for diagnosis
+      # —— 失败诊断闭环：Gradle 关键错误行以 ::error:: 输出为 check annotations，
+      #    无需任何写权限即可从 API 读回 ——
+      - name: Emit build error annotations
         if: failure()
         run: |
-          {
-            echo "=== versions ==="
-            node -p "require('react-native/package.json').version"
-            node -p "require('llama.rn/package.json').version"
-            echo "=== gradle log tail ==="
-            tail -n 400 /tmp/gradle-build.log 2>/dev/null || echo "(no gradle log captured)"
-          } > ci-diagnosis.txt
-          git config user.name "twincore-ci"
-          git config user.email "twincore@users.noreply.github.com"
-          git checkout -B ci-diagnosis
-          git add ci-diagnosis.txt
-          git commit -m "ci: build diagnosis log"
-          git push -f origin ci-diagnosis
+          tail -n 300 /tmp/gradle-build.log > /tmp/gradle-tail.txt 2>/dev/null || true
+          grep -E "FAILURE: Build failed|What went wrong|Caused by:|error:|Error:|Execution failed for task|> Task .*FAILED" /tmp/gradle-tail.txt | tail -n 35 | cut -c1-500 | while IFS= read -r l; do echo "::error::$l"; done
+          node -p "'versions RN='+require('react-native/package.json').version+' llama.rn='+require('llama.rn/package.json').version" || true
 
       - name: Collect APK
         run: |
