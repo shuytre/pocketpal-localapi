@@ -20,6 +20,7 @@ import com.pocketpal.ExternalContentLinkPackage
 import com.pocketpal.download.DownloadPackage
 import com.pocketpal.localapi.LocalApiServerPackage
 import com.pocketpal.perf.PerfTunePackage
+import com.pocketpal.TwinCorePerfPackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -39,6 +40,10 @@ class MainApplication : Application(), ReactApplication {
               // 不触碰 llama.rn 的推理实现。
               add(LocalApiServerPackage())
               add(PerfTunePackage())
+              // TwinCore 三档性能模式：经 Shizuku（ADB/Root）代理写入
+              // /sys/devices/system/cpu/*/cpufreq。无授权时只上报状态，
+              // 绝不偷偷改系统设置。
+              add(TwinCorePerfPackage())
             }
 
         override fun getJSMainModuleName(): String = "index"

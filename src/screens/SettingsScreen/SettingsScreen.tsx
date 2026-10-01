@@ -49,6 +49,7 @@ import {useTheme} from '../../hooks';
 
 import {createStyles} from './styles';
 import {CacheTypeMenuRow, useMenuAnchor} from './CacheTypeMenuRow';
+import {PerformanceModeSection} from './PerformanceModeSection';
 
 import {
   modelStore,
@@ -945,6 +946,9 @@ export const SettingsScreen: React.FC = observer(() => {
               </List.Accordion>
             </Card.Content>
           </Card>
+
+          {/* TwinCore 性能模式。Android only —— 组件在非 Android 上返回 null。 */}
+          <PerformanceModeSection />
 
           {/* Memory Settings */}
           <Card elevation={0} style={styles.card}>
