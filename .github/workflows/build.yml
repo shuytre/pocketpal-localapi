@@ -64,7 +64,7 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-36 build-tools;36.0.0 ndk;27.3.13750724 cmake;3.22.1'
 
-      # —— 缓存层 2/3：Gradle 用户缓存（wrapper 下载、依赖、构建缓存） ——
+      # —— 缓存层 2/3：Gradle 用户缓存 + CMake 中间产物 ——
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
@@ -74,6 +74,14 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('android/*.gradle', 'android/**/*.gradle', 'android/gradle.properties') }}
           restore-keys: |
             gradle-${{ runner.os }}-
+
+      - name: Cache CMake build
+        uses: actions/cache@v4
+        with:
+          path: android/app/.cxx
+          key: cmake-${{ runner.os }}-${{ hashFiles('android/app/src/main/jni/CMakeLists.txt', 'android/app/build.gradle') }}
+          restore-keys: |
+            cmake-${{ runner.os }}-
 
       - name: Create placeholder google-services.json
         run: |
@@ -122,21 +130,22 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      # —— 4 核并行编译（用户要求：吃满免费 runner）。
-      #     org.gradle.parallel / org.gradle.caching 已在 android/gradle.properties 打开。
-      #     注意：不要用 GRADLE_OPTS 覆盖 org.gradle.jvmargs —— 那会丢掉
-      #     gradle.properties 里的 -XX:MaxMetaspaceSize=512m，导致 RNGP 的
-      #     Kotlin 编译（:gradle-plugin:shared:compileKotlin）在并行下失败。
-      #     改用 -Dorg.gradle.workers.max 显式设并行度，JVM 参数走仓库默认。 ——
+      # —— 4 核并行编译（吃满 runner 可用核心）。 ——
+      # JVM 参数必须保留 MaxMetaspaceSize：RNGP 的 Kotlin 编译在并行下
+      # 会同时起多个编译器，Metaspace 不够会直接编译失败。
+      # CMAKE_BUILD_PARALLEL_LEVEL 让 NDK/CMake 侧也并行。
       - name: Build Debug APK (arm64)
         env:
           NODE_OPTIONS: --max-old-space-size=4096
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g"
+          CMAKE_BUILD_PARALLEL_LEVEL: "4"
         run: |
           cd android
           set -o pipefail
           ./gradlew assembleProdDebug \
             --console=plain \
             --stacktrace \
+            --parallel \
             --max-workers=4 \
             --build-cache \
             -PreactNativeArchitectures=arm64-v8a 2>&1 | tee /tmp/gradle-build.log

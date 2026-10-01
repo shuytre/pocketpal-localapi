@@ -1,8 +1,11 @@
 package com.pocketpal
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.os.IBinder
 import android.util.Log
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
@@ -10,6 +13,10 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.module.annotations.ReactModule
 import com.pocketpal.specs.NativeTwinCorePerfSpec
+// 注意：本文件 package 是 com.pocketpal，而 AIDL 生成类在 com.pocketpalai 包下，
+// 不显式 import 会直接 Unresolved reference（CI 上就是这种错误最耗时）。
+import com.pocketpalai.ITwinCoreShell
+import com.pocketpalai.TwinCoreShellService
 import org.json.JSONObject
 import rikka.shizuku.Shizuku
 import java.io.File
@@ -20,6 +27,9 @@ import java.util.concurrent.TimeUnit
 
 private const val TAG = "TwinCorePerf"
 private const val CPU_BASE = "/sys/devices/system/cpu/"
+
+/** UserService 绑定等待上限。冷启动时 Shizuku 拉起子进程通常 <1s。 */
+private const val USER_SERVICE_TIMEOUT_MS = 8_000L
 
 /**
  * TwinCore 三档性能模式 + Shizuku 状态面板。
@@ -696,22 +706,69 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
         ?: ShellResult(-1, "", "", "none", "Shizuku 未授权，且设备上没有可用的 su（未 Root）")
   }
 
+  /**
+   * 以 shell 身份执行脚本。
+   *
+   * Shizuku 13.1.1 起 `Shizuku#newProcess` 已变为 private 且计划移除，
+   * 官方指定的替代是 UserService —— 在独立进程里以 UID 2000(root 模式下为 0)
+   * 运行我们自己的代码。因此这里改成 bindUserService 的同步封装：
+   *
+   *   bindUserService(args, conn) → onServiceConnected 拿到 IBinder
+   *   → ITwinCoreShell.Stub.asInterface → exec(script) → 取 stdout/stderr/exit
+   *
+   * 每次调用都重新绑定再解绑，避免长期持有 binder；调频本身是低频操作
+   * （用户切档位时触发一次 + 每 60s 重应用一次），这点开销可以忽略。
+   */
   private fun shizukuShell(commands: List<String>): ShellResult {
     val script = commands.joinToString("\n") + "\nexit 0\n"
-    val process = Shizuku.newProcess(arrayOf("sh"), null, "/")
-    process.outputStream.use { os ->
-      os.write(script.toByteArray())
-      os.flush()
+    val latch = CountDownLatch(1)
+    val holder = arrayOfNulls<ITwinCoreShell>(1)
+
+    val args = Shizuku.UserServiceArgs(
+            ComponentName(reactContext.packageName, TwinCoreShellService::class.java.name))
+        .daemon(false)
+        .processNameSuffix("shell")
+        .debuggable(false)
+        .version(1)
+
+    val connection = object : ServiceConnection {
+      override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+        holder[0] = if (binder != null && binder.pingBinder()) {
+          ITwinCoreShell.Stub.asInterface(binder)
+        } else {
+          null
+        }
+        latch.countDown()
+      }
+
+      override fun onServiceDisconnected(name: ComponentName?) {
+        holder[0] = null
+        latch.countDown()
+      }
     }
-    val stdout = readFully(process.inputStream)
-    val stderr = try {
-      readFully(process.errorStream)
+
+    return try {
+      Shizuku.bindUserService(args, connection)
+      if (!latch.await(USER_SERVICE_TIMEOUT_MS, TimeUnit.MILLISECONDS) || holder[0] == null) {
+        ShellResult(-1, "", "", "shizuku", "UserService 连接超时或失败")
+      } else {
+        val svc = holder[0]!!
+        val code = svc.exec(script)
+        val stdout = svc.execOut() ?: ""
+        val stderr = svc.execErr() ?: ""
+        Log.d(TAG, "shizuku us exit=$code out=${stdout.take(2000)}")
+        ShellResult(code, stdout, stderr, "shizuku", null)
+      }
     } catch (t: Throwable) {
-      ""
+      Log.w(TAG, "shizuku UserService 调用失败", t)
+      ShellResult(-1, "", "", "shizuku", "UserService：${t.message}")
+    } finally {
+      try {
+        Shizuku.unbindUserService(args, connection, true)
+      } catch (t: Throwable) {
+        // ignore
+      }
     }
-    val code = process.waitFor()
-    Log.d(TAG, "shizuku shell exit=$code out=${stdout.take(2000)}")
-    return ShellResult(code, stdout, stderr, "shizuku", null)
   }
 
   private fun suShell(commands: List<String>): ShellResult? {
