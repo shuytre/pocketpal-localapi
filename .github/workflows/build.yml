@@ -141,11 +141,11 @@ jobs:
       - name: Emit build error annotations
         if: failure()
         run: |
-          tail -n 300 /tmp/gradle-build.log > /tmp/gradle-tail.txt 2>/dev/null || true
-          grep -nE "FAILURE: Build failed|What went wrong|Caused by:|error:|Error:|Execution failed for task|> Task .*FAILED|^[0-9]*:*e: |Unresolved reference|-Werror|Compilation error" /tmp/gradle-tail.txt | tail -n 30 | cut -c1-500 | while IFS= read -r l; do echo "::error::$l"; done
-          echo "=== last 40 lines verbatim ==="
-          tail -n 40 /tmp/gradle-tail.txt | cut -c1-500 | while IFS= read -r l; do echo "::error::$l"; done
-          node -p "'versions RN='+require('react-native/package.json').version+' llama.rn='+require('llama.rn/package.json').version" || true
+          tr '\r' '\n' < /tmp/gradle-build.log 2>/dev/null | tail -n 350 > /tmp/gradle-tail.txt || true
+          echo "=== verbatim tail (last 25 non-empty lines) ==="
+          grep -v '^[[:space:]]*$' /tmp/gradle-tail.txt | tail -n 25 | cut -c1-450 | while IFS= read -r l; do echo "::error::$l"; done
+          echo "=== key error lines ==="
+          grep -E "^e: |Unresolved reference|Caused by:|Compilation error" /tmp/gradle-tail.txt | tail -n 15 | cut -c1-450 | while IFS= read -r l; do echo "::error::$l"; done
 
       - name: Collect APK
         run: |
