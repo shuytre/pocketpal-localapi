@@ -57,10 +57,24 @@ export async function resolveDeviceSelection(selection: {
     return snapshot;
   }
 
-  const device = selectHexagonDevice(await getAvailableDevices());
-  return device
-    ? {...snapshot, devices: [device.deviceName]}
-    : {devices: ['CPU'], n_gpu_layers: 0};
+  const devices = await getAvailableDevices();
+  const htpDevice = selectHexagonDevice(devices);
+  if (htpDevice) {
+    return {...snapshot, devices: [htpDevice.deviceName]};
+  }
+
+  // TwinCore: HTP 拿不到时不要一步跳到 CPU —— 先退到 Adreno OpenCL，
+  // 它比 CPU 快一档。只有 OpenCL 也不存在（或设备没上报）才落到 CPU。
+  const gpuDevice = devices.find(device => device.type === 'gpu');
+  if (gpuDevice?.deviceName) {
+    return {
+      ...snapshot,
+      devices: [gpuDevice.deviceName],
+      n_gpu_layers: snapshot.n_gpu_layers ?? 99,
+    };
+  }
+
+  return {devices: ['CPU'], n_gpu_layers: 0};
 }
 
 /**

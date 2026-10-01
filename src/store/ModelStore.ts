@@ -7,7 +7,7 @@ import {makePersistable} from 'mobx-persist-store';
 import * as RNFS from '@dr.pogodin/react-native-fs';
 import {computed, makeAutoObservable, runInAction, toJS} from 'mobx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {ContextParams, LlamaContext, initLlama} from 'llama.rn';
+import {ContextParams, LlamaContext} from 'llama.rn';
 import {
   CompletionParams,
   CompletionEngine,
@@ -32,6 +32,7 @@ import {
 } from './draftResolution';
 import {checkGpuSupport} from '../utils/deviceCapabilities';
 import {resolveDeviceSelection} from '../utils/deviceSelection';
+import {initLlamaWithTwinCore} from '../utils/twincore';
 import {
   deepMerge,
   getSHA256Hash,
@@ -2320,7 +2321,10 @@ class ModelStore {
       const contextInitParams = createContextInitParams(effectiveSettings);
 
       const t0 = Date.now();
-      const ctx = await initLlama(
+      // TwinCore: 走统一的后端回退链（Hexagon HTP → OpenCL GPU → CPU），
+      // 并在 Android 上强制 CPU 亲和性（双 A75 大核）。用户设置里的
+      // n_threads / devices 在这里被 TwinCore 策略覆盖。
+      const ctx = await initLlamaWithTwinCore(
         {
           model: filePath,
           ...effectiveSettings, // Use effectiveSettings without version for llama.rn
@@ -3965,3 +3969,4 @@ class ModelStore {
 }
 
 export const modelStore = new ModelStore();
+
