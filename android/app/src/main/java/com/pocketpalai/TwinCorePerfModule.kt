@@ -725,7 +725,7 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
     val holder = arrayOfNulls<ITwinCoreShell>(1)
 
     val args = Shizuku.UserServiceArgs(
-            ComponentName(reactContext.packageName, TwinCoreShellService::class.java.name))
+            ComponentName(reactApplicationContext.packageName, TwinCoreShellService::class.java.name))
         .daemon(false)
         .processNameSuffix("shell")
         .debuggable(false)
