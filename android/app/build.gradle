@@ -107,16 +107,11 @@ android {
             // include ReactNative-application.cmake — see jni/CMakeLists.txt.
             path file("src/main/jni/CMakeLists.txt")
 
-            // TwinCore: 显式声明后端开关。
-            // 注意这两个 -D 只作用于本模块的 libappmodules.so —— CMake 对未被
-            // 引用的变量是惰性的，不写也不报错，写了也不影响 llama.rn。
-            // llama.rn 的 Hexagon / OpenCL 是否真正编进去由它自己的 CMake 决定：
-            //   · 预编译产物（rnllamaBuildFromSource=false，默认）里已包含
-            //     librnllama_v8_2_dotprod_i8mm_hexagon_opencl.so；
-            //   · 改为从源码编译时需要 HEXAGON_SDK_ROOT(6.4.0.2)，
-            //     否则只会得到纯 CPU 构建。
-            // 详见 android/gradle.properties 中的说明。
-            arguments "-DGGML_HEXAGON=ON", "-DGGML_OPENCL=ON"
+            // TwinCore: llama.rn 的 Hexagon / OpenCL 是否编入由它自己的 CMake
+            // 决定（预编译产物已含 hexagon_opencl 变体；从源码编译才需要
+            // HEXAGON_SDK_ROOT）。注意 AGP 的顶层 externalNativeBuild.cmake
+            // 只接受 path/version，写 arguments 会在配置期报
+            // "Could not find method arguments()"（CI 已踩过此坑）。
         }
     }
     signingConfigs {
