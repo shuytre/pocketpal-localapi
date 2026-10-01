@@ -112,7 +112,7 @@ jobs:
         run: chmod +x ./scripts/*.sh
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
 
       # TwinCore：launcher PNG 不进 git —— 从 assets/svg/ 唯一样式源实时导出
       # （mdpi 48 / hdpi 72 / xhdpi 96 / xxhdpi 144 / xxxhdpi 192 + adaptive 108dp）。
@@ -130,10 +130,29 @@ jobs:
           GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.daemon=false"
         run: |
           cd android
+          set -o pipefail
           ./gradlew assembleProdDebug \
             --max-workers=4 \
             --build-cache \
-            -PreactNativeArchitectures=arm64-v8a
+            -PreactNativeArchitectures=arm64-v8a 2>&1 | tee /tmp/gradle-build.log
+
+      # —— 失败诊断闭环：把 Gradle 日志尾部推到 ci-diagnosis 分支，供离线读取 ——
+      - name: Push build log tail for diagnosis
+        if: failure()
+        run: |
+          {
+            echo "=== versions ==="
+            node -p "require('react-native/package.json').version"
+            node -p "require('llama.rn/package.json').version"
+            echo "=== gradle log tail ==="
+            tail -n 400 /tmp/gradle-build.log 2>/dev/null || echo "(no gradle log captured)"
+          } > ci-diagnosis.txt
+          git config user.name "twincore-ci"
+          git config user.email "twincore@users.noreply.github.com"
+          git checkout -B ci-diagnosis
+          git add ci-diagnosis.txt
+          git commit -m "ci: build diagnosis log"
+          git push -f origin ci-diagnosis
 
       - name: Collect APK
         run: |
