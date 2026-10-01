@@ -130,10 +130,13 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      # —— 4 核并行编译（吃满 runner 可用核心）。 ——
+      # —— 编译（吃满 runner 可用核心）。 ——
       # JVM 参数必须保留 MaxMetaspaceSize：RNGP 的 Kotlin 编译在并行下
       # 会同时起多个编译器，Metaspace 不够会直接编译失败。
       # CMAKE_BUILD_PARALLEL_LEVEL 让 NDK/CMake 侧也并行。
+      # Kotlin 编译走 in-process（在 Gradle daemon 堆内），不再 fork 独立
+      # Kotlin daemon —— run #9 实测 4 worker 下 worker 进程层崩溃且无 e: 行，
+      # in-process 彻底消除这一类故障。
       - name: Build Debug APK (arm64)
         env:
           NODE_OPTIONS: --max-old-space-size=4096
@@ -146,20 +149,23 @@ jobs:
             --console=plain \
             --stacktrace \
             --parallel \
-            --max-workers=4 \
             --build-cache \
+            -Pkotlin.compiler.execution.strategy=in-process \
             -PreactNativeArchitectures=arm64-v8a 2>&1 | tee /tmp/gradle-build.log
 
       # —— 失败诊断闭环：Gradle 关键错误行以 ::error:: 输出为 check annotations，
-      #    无需任何写权限即可从 API 读回 ——
+      #    无需任何写权限即可从 API 读回。最后 60 行兜底 —— 保证任何形式的
+      #    失败（含无 e: 行的 worker 崩溃）都能看到真实报错。 ——
       - name: Emit build error annotations
         if: failure()
         run: |
           tr '\r' '\n' < /tmp/gradle-build.log 2>/dev/null > /tmp/g.log || true
           echo "=== FAILURE block ==="
           awk '/FAILURE: Build failed/{f=1} f{print; c++; if(c>32) exit}' /tmp/g.log | grep -v '^[[:space:]]*$' | cut -c1-450 | while IFS= read -r l; do echo "::error::$l"; done
-          echo "=== kotlin e: lines ==="
-          grep -E '^e: ' /tmp/g.log | head -n 12 | cut -c1-450 | while IFS= read -r l; do echo "::error::$l"; done
+          echo "=== kotlin/compiler error lines ==="
+          grep -E '^e: |error: |Unresolved reference|OutOfMemory|Kotlin daemon|Caused by:' /tmp/g.log | head -n 12 | cut -c1-450 | while IFS= read -r l; do echo "::error::$l"; done
+          echo "=== tail 60 lines (fallback) ==="
+          tail -n 60 /tmp/g.log | grep -v '^[[:space:]]*$' | cut -c1-450 | while IFS= read -r l; do echo "::error::$l"; done
 
       - name: Collect APK
         run: |
