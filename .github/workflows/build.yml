@@ -132,6 +132,8 @@ jobs:
           cd android
           set -o pipefail
           ./gradlew assembleProdDebug \
+            --console=plain \
+            --stacktrace \
             --max-workers=4 \
             --build-cache \
             -PreactNativeArchitectures=arm64-v8a 2>&1 | tee /tmp/gradle-build.log
@@ -141,11 +143,11 @@ jobs:
       - name: Emit build error annotations
         if: failure()
         run: |
-          tr '\r' '\n' < /tmp/gradle-build.log 2>/dev/null | tail -n 350 > /tmp/gradle-tail.txt || true
-          echo "=== verbatim tail (last 25 non-empty lines) ==="
-          grep -v '^[[:space:]]*$' /tmp/gradle-tail.txt | tail -n 25 | cut -c1-450 | while IFS= read -r l; do echo "::error::$l"; done
-          echo "=== key error lines ==="
-          grep -E "^e: |Unresolved reference|Caused by:|Compilation error" /tmp/gradle-tail.txt | tail -n 15 | cut -c1-450 | while IFS= read -r l; do echo "::error::$l"; done
+          tr '\r' '\n' < /tmp/gradle-build.log 2>/dev/null > /tmp/g.log || true
+          echo "=== FAILURE block ==="
+          awk '/FAILURE: Build failed/{f=1} f{print; c++; if(c>32) exit}' /tmp/g.log | grep -v '^[[:space:]]*$' | cut -c1-450 | while IFS= read -r l; do echo "::error::$l"; done
+          echo "=== kotlin e: lines ==="
+          grep -E '^e: ' /tmp/g.log | head -n 12 | cut -c1-450 | while IFS= read -r l; do echo "::error::$l"; done
 
       - name: Collect APK
         run: |
