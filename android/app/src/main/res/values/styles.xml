@@ -1,9 +1,21 @@
 <resources>
 
-    <!-- Base application theme. -->
+    <!-- Base application theme.
+         `Theme.AppCompat.DayNight.*` inherits a light window/activity
+         background on a light-mode device, which shows as a white flash
+         between the dark native splash (`AppTheme.Starting`, #0A0E1A)
+         tearing down and the first RN frame painting. Pin both the window
+         background and the activity background to the brand dark so the
+         launch surface is continuous regardless of the system color
+         scheme. (React Native still renders its own themed surface on
+         top; these only cover the pre-first-frame gap.) -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <!-- Customize your theme here. -->
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+        <item name="android:windowBackground">@color/twincore_splash_background</item>
+        <item name="android:colorBackground">@color/twincore_splash_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/twincore_splash_background</item>
+        <item name="android:navigationBarColor">@color/twincore_splash_background</item>
     </style>
 
     <!-- TwinCore 启动屏（Android 12+ SplashScreen API）。
@@ -11,7 +23,7 @@
          入场序列由 RN 侧 reanimated 承接，系统层只负责「无白屏冷启动」。
          API 24-30 由 androidx core-splashscreen 回填同样外观。 -->
     <style name="AppTheme.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#0A0E1A</item>
+        <item name="windowSplashScreenBackground">@color/twincore_splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
         <item name="postSplashScreenTheme">@style/AppTheme</item>
     </style>

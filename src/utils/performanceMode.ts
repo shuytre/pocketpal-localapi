@@ -3,6 +3,7 @@ import {Platform} from 'react-native';
 
 import NativeTwinCorePerf from '../specs/NativeTwinCorePerf';
 import type {
+  TwinCoreKillReport,
   TwinCorePerfMode,
   TwinCorePerfReport,
   TwinCoreShizukuStatus,
@@ -182,6 +183,30 @@ export async function restorePerformanceMode(): Promise<
   try {
     const report = await NativeTwinCorePerf!.restorePerformanceMode();
     return {kind: 'ok', value: report};
+  } catch (e: any) {
+    return {kind: 'error', reason: e?.message ?? String(e)};
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 智能模式：杀非系统后台进程（需求 7）
+// ---------------------------------------------------------------------------
+
+/**
+ * 杀掉非系统后台进程，只保留 Shizuku 与本应用。
+ *
+ * 高风险操作：会终止其它后台应用。调用方必须在 UI 上给出明确警告。
+ * 原生侧已 try/catch 且未授权时只回报告，但这里仍再包一层 —— 桥接层
+ * 抛异常不能让它冒泡到 UI 把页面带崩。
+ */
+export async function killBackgroundProcesses(): Promise<
+  TwinCorePerfOutcome<TwinCoreKillReport>
+> {
+  if (!isPerformanceModeSupported()) {
+    return unsupported('智能模式仅在 Android 上可用。');
+  }
+  try {
+    return {kind: 'ok', value: await NativeTwinCorePerf!.killBackgroundProcesses()};
   } catch (e: any) {
     return {kind: 'error', reason: e?.message ?? String(e)};
   }

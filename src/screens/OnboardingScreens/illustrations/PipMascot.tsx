@@ -1,33 +1,37 @@
 import React from 'react';
 import Svg, {Circle, G, Path, Rect} from 'react-native-svg';
 
-import {useTheme} from '../../../hooks';
-
 export type PipMascotProps = {
   /** Outer width in RN points; height scales to keep aspect 66:62. */
   width?: number;
 };
 
-// Figma palette — sourced verbatim from the canonical file for the
-// recommended-pal mascot at `887:30085`.
-const MASCOT_BG = '#CED5D3'; // Color/green/subtle
-const MASCOT_BORDER = '#FAFAFA'; // Color/primary/foreground
+// TwinCore brand palette.
+const BRAND_DARK = '#0A0E1A'; // deep brand background
+const BRAND_MINT = '#00E5A0'; // primary accent
+const BRAND_MINT_DIM = '#00B283'; // secondary / efficiency
+const BRAND_NODE = '#F1F5F9'; // node / foreground glyph
 
 /**
- * Screen 6 illustration — the recommended-pal "Pip" mascot. A
- * 66×62 rounded card (green-subtle bg, 3px white border) with a
- * friendly cartoon face inside: two black eye dots, a curved
- * eyebrow stroke, and a tiny "ping" speech notch at the bottom.
- * Ported from Figma `887:30085`.
+ * Screen 6 illustration — TwinCore "twin-core" mascot. Replaces the
+ * PocketPal yellow "Pip" mascot with a brand-aligned geometric mark: a
+ * 66×62 rounded dark card holding two stacked mint cores (performance +
+ * efficiency) bridged by a hollow node — the same double-core motif as
+ * the app icon and splash. Colour is fixed brand (not theme-derived) so
+ * the mark reads identically in light and dark system schemes.
+ *
+ * Contract preserved: same export name `PipMascot`, same
+ * `PipMascotProps` (`width?`), same 66:62 aspect ratio.
  */
 export const PipMascot: React.FC<PipMascotProps> = ({width = 66}) => {
-  const theme = useTheme();
   const viewBoxW = 66;
   const viewBoxH = 62;
   const height = (width * viewBoxH) / viewBoxW;
+  // Card fill is fixed brand dark regardless of the system scheme, matching
+  // the app icon / splash mark; only the glyph accents vary.
   return (
     <Svg width={width} height={height} viewBox={`0 0 ${viewBoxW} ${viewBoxH}`}>
-      {/* Mascot card. */}
+      {/* Brand card. */}
       <Rect
         x={1.5}
         y={1.5}
@@ -35,32 +39,79 @@ export const PipMascot: React.FC<PipMascotProps> = ({width = 66}) => {
         height={viewBoxH - 3}
         rx={18}
         ry={18}
-        fill={MASCOT_BG}
-        stroke={MASCOT_BORDER}
-        strokeWidth={3}
+        fill={BRAND_DARK}
+        stroke={BRAND_MINT}
+        strokeWidth={2}
+        strokeOpacity={0.55}
       />
       <G>
-        {/* Eyes — two black dots, centered horizontally with a 13px gap. */}
-        <Circle cx={26.3} cy={31} r={3.3} fill={theme.colors.onBackground} />
-        <Circle cx={39.7} cy={31} r={3.3} fill={theme.colors.onBackground} />
-        {/* Eyebrow arc (left brow tilted). */}
+        {/* Upper performance core. */}
+        <Rect
+          x={20}
+          y={14}
+          width={26}
+          height={15}
+          rx={5}
+          ry={5}
+          fill={BRAND_MINT}
+        />
+        <Rect
+          x={25}
+          y={19.5}
+          width={12}
+          height={2.6}
+          rx={1.3}
+          ry={1.3}
+          fill={BRAND_DARK}
+          opacity={0.55}
+        />
+        {/* Lower efficiency core. */}
+        <Rect
+          x={20}
+          y={34}
+          width={26}
+          height={15}
+          rx={5}
+          ry={5}
+          fill={BRAND_MINT_DIM}
+        />
+        <Rect
+          x={25}
+          y={39.5}
+          width={12}
+          height={2.6}
+          rx={1.3}
+          ry={1.3}
+          fill={BRAND_DARK}
+          opacity={0.45}
+        />
+        {/* Bridge + hollow node. */}
         <Path
-          d="M 20 16 Q 23 12 28 14"
-          stroke={theme.colors.onBackground}
-          strokeWidth={1.4}
-          fill="none"
+          d="M 33 29 V 33 M 33 34 V 34"
+          stroke={BRAND_NODE}
+          strokeWidth={2.6}
           strokeLinecap="round"
         />
-        {/* Ping / speech dot at the bottom. */}
-        <Rect
-          x={(viewBoxW - 5) / 2}
-          y={38.6}
-          width={5}
-          height={2.7}
-          rx={1.4}
-          ry={1.4}
-          fill={theme.colors.onBackground}
+        <Path d="M 40 31.5 L 45.5 26 L 51 31.5 L 45.5 37 Z" fill={BRAND_NODE} />
+        <Path
+          d="M 45.5 29.5 L 48 31.5 L 45.5 33.5 L 43 31.5 Z"
+          fill={BRAND_DARK}
         />
+        {/* Twin lanes reaching the node. */}
+        <Path
+          d="M 46 21.5 H 57"
+          stroke={BRAND_NODE}
+          strokeWidth={2.2}
+          strokeLinecap="round"
+        />
+        <Path
+          d="M 46 41.5 H 57"
+          stroke={BRAND_NODE}
+          strokeWidth={2.2}
+          strokeLinecap="round"
+        />
+        {/* Accent dot, echoes the brand pulse. */}
+        <Circle cx={13} cy={31.5} r={2.2} fill={BRAND_MINT} />
       </G>
     </Svg>
   );

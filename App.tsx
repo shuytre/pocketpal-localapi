@@ -1,12 +1,12 @@
 import * as React from 'react';
-import {Appearance, Dimensions, Platform, StyleSheet, View} from 'react-native';
+import {Platform, StyleSheet, View} from 'react-native';
 
 import {observer} from 'mobx-react';
 import {isHydrated} from 'mobx-persist-store';
 import {NavigationContainer} from '@react-navigation/native';
 import {Provider as PaperProvider} from 'react-native-paper';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
-import {createDrawerNavigator} from '@react-navigation/drawer';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {KeyboardProvider} from 'react-native-keyboard-controller';
 import {
@@ -24,14 +24,13 @@ import {L10nContext} from './src/utils';
 import {ROUTES} from './src/utils/navigationConstants';
 
 import {
-  SidebarContent,
   ModelsHeaderRight,
   PalHeaderRight,
-  HeaderLeft,
   AppWithMigration,
   TTSSetupSheet,
   DownloadOverlay,
   HubRunSheetHost,
+  LiquidGlassTabBar,
 } from './src/components';
 import {MarkdownProvider} from './src/components/MarkdownView';
 import {SplashOverlay} from './src/components/SplashOverlay';
@@ -54,9 +53,10 @@ import {OnboardingStack} from './src/screens/OnboardingScreens';
 // Check if app is in debug mode
 const isDebugMode = __DEV__;
 
-const Drawer = createDrawerNavigator();
-
-const screenWidth = Dimensions.get('window').width;
+// Main bottom-tab navigator. The visible bar is a custom floating
+// liquid-glass component; secondary routes are registered as siblings and
+// filtered out of the bar (see MainTabs).
+const Tab = createBottomTabNavigator();
 
 // Component that handles deep linking - must be inside NavigationContainer
 const DeepLinkHandler = () => {
@@ -64,23 +64,130 @@ const DeepLinkHandler = () => {
   return null;
 };
 
+// Every destination the app can navigate to. The four "primary" ones render a
+// button in the floating liquid-glass bar; the rest (Pals / Benchmark /
+// App Info / Dev Tools / Benchmark Runner) are registered as siblings that the
+// custom bar filters out, so existing `navigate(ROUTES.XXX)` calls by bare
+// route name still resolve. This mirrors the previous flat Drawer layout,
+// where all routes were siblings in one navigator.
+const MainTabs: React.FC = observer(() => {
+  const theme = useTheme();
+  const currentL10n = l10n[uiStore.language];
+  const styles = createStyles(theme);
+
+  return (
+    <Tab.Navigator
+      tabBar={props => <LiquidGlassTabBar {...props} />}
+      screenOptions={{
+        headerStyle: styles.headerWithoutDivider,
+        headerTintColor: theme.colors.onBackground,
+        headerTitleStyle: styles.headerTitle,
+      }}>
+      {/* === primary tabs (shown in the glass bar) === */}
+      <Tab.Screen
+        name={ROUTES.CHAT}
+        component={gestureHandlerRootHOC(ChatScreen)}
+        options={{headerShown: false}}
+      />
+      <Tab.Screen
+        name={ROUTES.MODELS}
+        component={gestureHandlerRootHOC(ModelsScreen)}
+        options={{
+          headerRight: () => <ModelsHeaderRight />,
+          headerStyle: styles.headerWithoutDivider,
+          title: currentL10n.screenTitles.models,
+        }}
+      />
+      <Tab.Screen
+        name={ROUTES.LOCAL_API}
+        component={gestureHandlerRootHOC(LocalApiScreen)}
+        options={{
+          headerStyle: styles.headerWithoutDivider,
+          title: currentL10n.screenTitles.localApi,
+        }}
+      />
+      <Tab.Screen
+        name={ROUTES.SETTINGS}
+        component={gestureHandlerRootHOC(SettingsScreen)}
+        options={{
+          headerStyle: styles.headerWithoutDivider,
+          title: currentL10n.screenTitles.settings,
+        }}
+      />
+
+      {/* === secondary destinations (registered, not shown in the bar) === */}
+      <Tab.Screen
+        name={ROUTES.PALS}
+        component={gestureHandlerRootHOC(PalsScreen)}
+        options={{
+          headerRight: () => <PalHeaderRight />,
+          headerStyle: styles.headerWithoutDivider,
+          title: currentL10n.screenTitles.pals,
+        }}
+      />
+      <Tab.Screen
+        name={ROUTES.BENCHMARK}
+        component={gestureHandlerRootHOC(BenchmarkScreen)}
+        options={{
+          headerStyle: styles.headerWithoutDivider,
+          title: currentL10n.screenTitles.benchmark,
+        }}
+      />
+      <Tab.Screen
+        name={ROUTES.APP_INFO}
+        component={gestureHandlerRootHOC(AboutScreen)}
+        options={{
+          headerStyle: styles.headerWithoutDivider,
+          title: currentL10n.screenTitles.appInfo,
+        }}
+      />
+      {isDebugMode && (
+        <Tab.Screen
+          name={ROUTES.DEV_TOOLS}
+          component={gestureHandlerRootHOC(DevToolsScreen)}
+          options={{
+            headerStyle: styles.headerWithoutDivider,
+            title: 'Dev Tools',
+          }}
+        />
+      )}
+      {/*
+        E2E-only deep-link-driven benchmark matrix runner. Reachable only by
+        the deep link pocketpal://e2e/benchmark in the e2e flavor build (see
+        useDeepLinking cold-launch effect and
+        android/app/src/e2e/AndroidManifest.xml).
+      */}
+      {__E2E__ && (
+        <Tab.Screen
+          name={ROUTES.BENCHMARK_RUNNER}
+          component={gestureHandlerRootHOC(BenchmarkRunnerScreen)}
+          options={{
+            headerStyle: styles.headerWithoutDivider,
+            title: 'Benchmark Runner',
+          }}
+        />
+      )}
+    </Tab.Navigator>
+  );
+});
+
 // Branches between the OnboardingStack (first-launch flow) and the main
-// Drawer.Navigator. Both children mount under the same provider tree —
+// root-stack navigator. Both children mount under the same provider tree —
 // switching does NOT remount providers above this point.
 //
 // The hydration check is belt-and-suspenders. AppWithMigrationWrapper
 // already gates render on `isHydrated(uiStore)`, but reading the same
 // observable here keeps the contract local and survives refactors of the
 // outer gate.
-type SwitchPointProps = {drawer: React.ReactNode};
-const SwitchPoint: React.FC<SwitchPointProps> = observer(({drawer}) => {
+type SwitchPointProps = {main: React.ReactNode};
+const SwitchPoint: React.FC<SwitchPointProps> = observer(({main}) => {
   if (!isHydrated(uiStore)) {
     return null;
   }
   if (!uiStore.hasCompletedOnboarding) {
     return <OnboardingStack />;
   }
-  return <>{drawer}</>;
+  return <>{main}</>;
 });
 
 const App = observer(() => {
@@ -123,125 +230,7 @@ const App = observer(() => {
                 <NavigationContainer>
                   <DeepLinkHandler />
                   <BottomSheetModalProvider>
-                    <SwitchPoint
-                      drawer={
-                        <Drawer.Navigator
-                          screenOptions={{
-                            headerLeft: () => <HeaderLeft />,
-                            drawerStyle: {
-                              width:
-                                screenWidth > 400 ? 320 : screenWidth * 0.8,
-                            },
-                            headerStyle: {
-                              backgroundColor: theme.colors.background,
-                            },
-                            headerTintColor: theme.colors.onBackground,
-                            headerTitleStyle: styles.headerTitle,
-                          }}
-                          drawerContent={props => (
-                            <SidebarContent {...props} />
-                          )}>
-                          <Drawer.Screen
-                            name={ROUTES.CHAT}
-                            component={gestureHandlerRootHOC(ChatScreen)}
-                            options={{
-                              headerShown: false,
-                            }}
-                          />
-                          <Drawer.Screen
-                            name={ROUTES.PALS}
-                            component={gestureHandlerRootHOC(PalsScreen)}
-                            options={{
-                              headerRight: () => <PalHeaderRight />,
-                              headerStyle: styles.headerWithoutDivider,
-                              title: currentL10n.screenTitles.pals,
-                            }}
-                          />
-                          <Drawer.Screen
-                            name={ROUTES.MODELS}
-                            component={gestureHandlerRootHOC(ModelsScreen)}
-                            options={{
-                              headerRight: () => <ModelsHeaderRight />,
-                              headerStyle: styles.headerWithoutDivider,
-                              title: currentL10n.screenTitles.models,
-                            }}
-                          />
-                          <Drawer.Screen
-                            name={ROUTES.BENCHMARK}
-                            component={gestureHandlerRootHOC(BenchmarkScreen)}
-                            options={{
-                              headerStyle: styles.headerWithoutDivider,
-                              title: currentL10n.screenTitles.benchmark,
-                            }}
-                          />
-                          <Drawer.Screen
-                            name={ROUTES.SETTINGS}
-                            component={gestureHandlerRootHOC(SettingsScreen)}
-                            options={{
-                              headerStyle: styles.headerWithoutDivider,
-                              title: currentL10n.screenTitles.settings,
-                            }}
-                          />
-                          <Drawer.Screen
-                            name={ROUTES.APP_INFO}
-                            component={gestureHandlerRootHOC(AboutScreen)}
-                            options={{
-                              headerStyle: styles.headerWithoutDivider,
-                              title: currentL10n.screenTitles.appInfo,
-                            }}
-                          />
-
-                          {/* 局域网 API 服务。Android-only 功能：从设置页进入，
-                              因此在抽屉里隐藏条目，但仍必须是注册的 Drawer 路由，
-                              否则 navigate('LocalApi') 找不到目标。 */}
-                          {Platform.OS === 'android' && (
-                            <Drawer.Screen
-                              name={ROUTES.LOCAL_API}
-                              component={gestureHandlerRootHOC(LocalApiScreen)}
-                              options={{
-                                headerStyle: styles.headerWithoutDivider,
-                                title: currentL10n.screenTitles.localApi,
-                                drawerItemStyle: {display: 'none'},
-                              }}
-                            />
-                          )}
-
-                          {/* Only show Dev Tools screen in debug mode */}
-                          {isDebugMode && (
-                            <Drawer.Screen
-                              name={ROUTES.DEV_TOOLS}
-                              component={gestureHandlerRootHOC(DevToolsScreen)}
-                              options={{
-                                headerStyle: styles.headerWithoutDivider,
-                                title: 'Dev Tools',
-                              }}
-                            />
-                          )}
-
-                          {/*
-                      E2E-only deep-link-driven benchmark matrix runner.
-                      Hidden from the drawer sidebar via
-                      drawerItemStyle:{display:'none'}; reachable only by
-                      the deep link pocketpal://e2e/benchmark in the e2e
-                      flavor build (see useDeepLinking cold-launch effect
-                      and android/app/src/e2e/AndroidManifest.xml).
-                    */}
-                          {__E2E__ && (
-                            <Drawer.Screen
-                              name={ROUTES.BENCHMARK_RUNNER}
-                              component={gestureHandlerRootHOC(
-                                BenchmarkRunnerScreen,
-                              )}
-                              options={{
-                                headerStyle: styles.headerWithoutDivider,
-                                title: 'Benchmark Runner',
-                                drawerItemStyle: {display: 'none'},
-                              }}
-                            />
-                          )}
-                        </Drawer.Navigator>
-                      }
-                    />
+                    <SwitchPoint main={<MainTabs />} />
                     <TTSSetupSheet />
                     <DownloadOverlay />
                     <HubRunSheetHost />
@@ -275,28 +264,23 @@ const createStyles = (theme: Theme) =>
     },
   });
 
-// Neutral background-only hold, rendered until mobx-persist-store has
-// loaded UIStore from AsyncStorage. It is a single full-screen View whose
-// only meaningful property is backgroundColor, resolved from the system
-// color scheme. Deliberately carries NO branding, NO Text, NO
-// SafeAreaProvider, NO insets, and NO spinner: a flat colored View has
-// nothing to match against either native launch surface (iOS has a branded
-// storyboard, Android has no native launch screen), so it cannot diverge
-// from native on any axis and reads simply as "app launching".
+// Background-only hold, rendered until mobx-persist-store has loaded
+// UIStore from AsyncStorage. It is a single full-screen View whose only
+// meaningful property is backgroundColor.
+//
+// TwinCore: this MUST stay the same dark brand color as the native
+// `AppTheme.Starting` splash (android/.../values/styles.xml,
+// windowSplashScreenBackground = #0A0E1A). Resolving it from the system
+// color scheme used to paint pure white (#ffffff) on a light-mode device,
+// producing a white->dark flash between native splash teardown and this
+// first RN frame. Pinning it to #0A0E1A removes that flash on every
+// color scheme — light, dark, or AMOLED.
 const splashStyles = StyleSheet.create({
-  light: {flex: 1, backgroundColor: '#ffffff'},
-  dark: {flex: 1, backgroundColor: '#000000'},
+  hold: {flex: 1, backgroundColor: '#0A0E1A'},
 });
 
 const HydrationHold = () => (
-  <View
-    testID="hydration-splash"
-    style={
-      Appearance.getColorScheme() === 'dark'
-        ? splashStyles.dark
-        : splashStyles.light
-    }
-  />
+  <View testID="hydration-splash" style={splashStyles.hold} />
 );
 
 // Wrap the App component with AppWithMigration to show migration UI when

@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
-import {AppState, Platform, View} from 'react-native';
+import {AppState, Platform, Pressable, View} from 'react-native';
 import {Button, Card, Divider, Switch, Text} from 'react-native-paper';
 import {BatteryCharging, Gauge, Zap} from 'lucide-react-native';
 
@@ -85,6 +85,7 @@ export const PerformanceModeSection: React.FC = () => {
   const [applyState, setApplyState] = useState<ApplyState>('idle');
   const [busy, setBusy] = useState(false);
   const [failureList, setFailureList] = useState<string[]>([]);
+  const [rawErrorList, setRawErrorList] = useState<string[]>([]);
   const [appliedItems, setAppliedItems] = useState<string[]>([]);
   const [topology, setTopology] = useState<string | null>(null);
 
@@ -124,6 +125,9 @@ export const PerformanceModeSection: React.FC = () => {
     (report: TwinCorePerfReport, quiet: boolean) => {
       setAppliedItems(report.applied ?? []);
       setFailureList(report.failures ?? []);
+      // 底层错误（stderr / rc / errno）透出：只在有失败时展示，避免刷屏。
+      const raws = report.rawErrors ?? [];
+      setRawErrorList((report.failures?.length ?? 0) > 0 ? raws : []);
       setDetected(report.mode as TwinCorePerfMode);
       consumeTopology(report);
 
@@ -240,6 +244,7 @@ export const PerformanceModeSection: React.FC = () => {
     const next = value as TwinCorePerfMode;
     setMode(next);
     setFailureList([]);
+    setRawErrorList([]);
     setAppliedItems([]);
     savePerformanceMode(next);
     setApplyState(prev => {
@@ -436,7 +441,12 @@ export const PerformanceModeSection: React.FC = () => {
 
           <Divider style={styles.divider} />
 
-          {/* ---------- 档位选择器：三横向卡片，始终可用（降级路径） ---------- */}
+          {/* ---------- 档位选择器：三横向卡片，始终可用（降级路径） ----------
+              这里必须用普通 View + Pressable，不能用 Paper 的 <Card onPress>：
+              Paper Card 把 onPress 挂在内层 Pressable 上，而外层 Surface 的
+              阴影/圆角层会参与命中测试，点在两卡之间或卡片边缘时点击会被外层
+              吞掉 —— 这正是用户反馈「要点 2-3 下才切换」的根因（截图 #2）。
+              Pressable 直接铺满卡片、无内层包裹，一下即中。 */}
           <View style={styles.modeCards} testID="performance-mode-cards">
             {PERFORMANCE_MODES.map(m => {
               const Icon =
@@ -447,22 +457,28 @@ export const PerformanceModeSection: React.FC = () => {
                     : Zap;
               const selected = mode === m;
               return (
-                <Card
+                <Pressable
                   key={m}
                   onPress={() => handleSelect(m)}
                   disabled={!supported}
+                  accessibilityRole="radio"
+                  accessibilityState={{selected, disabled: !supported}}
                   style={[styles.modeCard, selected && styles.modeCardSelected]}
                   testID={`performance-mode-${m}`}>
                   <Icon
                     size={22}
-                    color={selected ? theme.colors.secondary : theme.colors.onSurfaceVariant}
+                    color={
+                      selected
+                        ? BRAND_COLORS.ok
+                        : theme.colors.onSurface
+                    }
                     style={styles.modeCardIcon}
                   />
                   <Text
                     style={[styles.modeCardLabel, selected && styles.modeCardLabelSelected]}>
                     {labelFor(m)}
                   </Text>
-                </Card>
+                </Pressable>
               );
             })}
           </View>
@@ -555,6 +571,15 @@ export const PerformanceModeSection: React.FC = () => {
                   variant="labelSmall"
                   style={styles.textDescription}>
                   {`• ${f}`}
+                </Text>
+              ))}
+              {/* 底层原因：stderr / rc / errno，帮用户判断是 SELinux 还是 perfd */}
+              {rawErrorList.map((e, i) => (
+                <Text
+                  key={`raw-${i}-${e}`}
+                  variant="labelSmall"
+                  style={[styles.textDescription, styles.errorText]}>
+                  {`  ↳ ${e}`}
                 </Text>
               ))}
             </View>

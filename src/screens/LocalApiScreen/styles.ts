@@ -59,6 +59,9 @@ export const createStyles = (theme: Theme) =>
       flex: 1,
       marginRight: 8,
     },
+    urlGroup: {
+      marginTop: 6,
+    },
     notice: {
       marginVertical: 8,
       color: theme.colors.error,

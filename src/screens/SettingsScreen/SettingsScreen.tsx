@@ -15,7 +15,7 @@ import {debounce} from 'lodash';
 import {observer} from 'mobx-react-lite';
 import {toJS} from 'mobx';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 import {
   Switch,
   Text,
@@ -28,20 +28,14 @@ import {
 
 import {
   GlobeIcon,
-  MoonIcon,
-  CpuChipIcon,
-  ShareIcon,
   LinkExternalIcon,
-  VolumeOnIcon,
 } from '../../assets/icons';
 
 import {
   TextInput,
   Menu,
   Divider,
-  HFTokenSheet,
   LanguageSelector,
-  SearchProviderKeySheet,
   InputSlider,
 } from '../../components';
 
@@ -50,27 +44,16 @@ import {useTheme} from '../../hooks';
 import {createStyles} from './styles';
 import {CacheTypeMenuRow, useMenuAnchor} from './CacheTypeMenuRow';
 import {PerformanceModeSection} from './PerformanceModeSection';
+import {SmartModeCard} from './SmartModeCard';
+import {PerformanceChecklist} from './PerformanceChecklist';
+import {BatteryOptimizationGuide} from './BatteryOptimizationGuide';
 
-import {
-  modelStore,
-  uiStore,
-  hfStore,
-  ttsStore,
-  searchProviderStore,
-} from '../../store';
-import type {SearchProviderId} from '../../services/search/types';
+import {modelStore, uiStore} from '../../store';
 
 import {CacheType, ModelType} from '../../utils/types';
-import {
-  L10nContext,
-  formatBytes,
-  clearAllSessionCaches,
-  getSessionCacheInfo,
-} from '../../utils';
-import {ROUTES} from '../../utils/navigationConstants';
+import {L10nContext} from '../../utils';
 import {t} from '../../locales';
 import {checkGpuSupport} from '../../utils/deviceCapabilities';
-import {exportLegacyChatSessions} from '../../utils/exportUtils';
 import {getDeviceOptions, DeviceOption} from '../../utils/deviceSelection';
 import {
   inferBackendType,
@@ -87,7 +70,6 @@ export const SettingsScreen: React.FC = observer(() => {
   const theme = useTheme();
   const styles = createStyles(theme);
   const isFocused = useIsFocused();
-  const navigation = useNavigation<any>();
   const [contextSize, setContextSize] = useState(
     modelStore.contextInitParams.n_ctx.toString(),
   );
@@ -99,14 +81,6 @@ export const SettingsScreen: React.FC = observer(() => {
   const draftKeyCacheMenu = useMenuAnchor();
   const draftValueCacheMenu = useMenuAnchor();
   const [showDraftModelMenu, setShowDraftModelMenu] = useState(false);
-  const [showHfTokenDialog, setShowHfTokenDialog] = useState(false);
-  const [showSearchProviderMenu, setShowSearchProviderMenu] = useState(false);
-  const [searchProviderAnchor, setSearchProviderAnchor] = useState<{
-    x: number;
-    y: number;
-  }>({x: 0, y: 0});
-  const [showSearchKeySheet, setShowSearchKeySheet] = useState(false);
-  const searchProviderButtonRef = useRef<View>(null);
   const [gpuSupported, setGpuSupported] = useState(false);
   const [draftModelAnchor, setDraftModelAnchor] = useState<{
     x: number;
@@ -342,52 +316,44 @@ export const SettingsScreen: React.FC = observer(() => {
     );
   };
 
-  const handleSearchProviderPress = () => {
-    searchProviderButtonRef.current?.measure(
-      (x, y, width, height, pageX, pageY) => {
-        setSearchProviderAnchor({x: pageX, y: pageY + height});
-        setShowSearchProviderMenu(true);
-      },
-    );
-  };
-
-  const activeSearchProvider = searchProviderStore.providers.find(
-    p => p.id === searchProviderStore.activeProviderId,
-  );
-  const activeSearchProviderId = searchProviderStore.activeProviderId;
-  const searchHasConsent = searchProviderStore.hasConsentedToSearch;
-
   return (
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
       <TouchableWithoutFeedback onPress={handleOutsidePress} accessible={false}>
         <ScrollView
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled">
-          {/* 局域网 API 服务：把已加载的 GGUF 模型以标准 OpenAI 接口暴露到局域网 */}
-          {Platform.OS === 'android' && (
-            <Card elevation={0} style={styles.card}>
-              <Card.Title title={l10n.settings.localApiTitle} />
-              <Card.Content>
-                <View style={styles.settingItemContainer}>
-                  <TouchableOpacity
-                    testID="local-api-entry"
-                    onPress={() => navigation.navigate(ROUTES.LOCAL_API)}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.localApiTitle}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.localApiDescription}
-                    </Text>
-                    <Text
-                      variant="labelSmall"
-                      style={[styles.textDescription, {color: theme.colors.primary}]}>
-                      {l10n.settings.localApiOpen}
-                    </Text>
-                  </TouchableOpacity>
+          {/* ① 语言 */}
+          <Card elevation={0} style={styles.card}>
+            <Card.Title title={l10n.settings.appSettings} />
+            <Card.Content>
+              <View style={styles.settingItemContainer}>
+                {/* Language Selection */}
+                <View style={styles.switchContainer}>
+                  <View style={styles.textContainer}>
+                    <View style={styles.labelWithIconContainer}>
+                      <GlobeIcon
+                        width={20}
+                        height={20}
+                        style={styles.settingIcon}
+                        stroke={theme.colors.onSurface}
+                      />
+                      <Text variant="titleMedium" style={styles.textLabel}>
+                        {l10n.settings.language}
+                      </Text>
+                    </View>
+                  </View>
+                  <LanguageSelector />
                 </View>
-              </Card.Content>
-            </Card>
-          )}
+              </View>
+            </Card.Content>
+          </Card>
+
+          {/* ② 性能模式设置：智能模式卡片 + 性能模式面板 + 分步引导清单 + 省电策略引导。
+              PerformanceModeSection / SmartModeCard 内部由并行任务维护，这里只做挂载。 */}
+          <SmartModeCard />
+          <PerformanceModeSection />
+          <PerformanceChecklist />
+          <BatteryOptimizationGuide />
 
           {/* Model Initialization Settings */}
           <Card elevation={0} style={styles.card}>
@@ -947,10 +913,7 @@ export const SettingsScreen: React.FC = observer(() => {
             </Card.Content>
           </Card>
 
-          {/* TwinCore 性能模式。Android only —— 组件在非 Android 上返回 null。 */}
-          <PerformanceModeSection />
-
-          {/* Memory Settings */}
+          {/* ④ Memory Settings */}
           <Card elevation={0} style={styles.card}>
             <Card.Title title={l10n.settings.memorySettings} />
             <Card.Content>
@@ -1030,534 +993,8 @@ export const SettingsScreen: React.FC = observer(() => {
               </Text>
             </Card.Content>
           </Card>
-
-          {/* Model Loading Settings */}
-          <Card elevation={0} style={styles.card}>
-            <Card.Title title={l10n.settings.modelLoadingSettings} />
-            <Card.Content>
-              <View style={styles.settingItemContainer}>
-                {/* Auto Offload/Load */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.autoOffloadLoad}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.autoOffloadLoadDescription}
-                    </Text>
-                  </View>
-                  <Switch
-                    testID="auto-offload-load-switch"
-                    value={modelStore.useAutoRelease}
-                    onValueChange={value =>
-                      modelStore.updateUseAutoRelease(value)
-                    }
-                  />
-                </View>
-                <Divider />
-
-                {/* Auto Navigate to Chat */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.autoNavigateToChat}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.autoNavigateToChatDescription}
-                    </Text>
-                  </View>
-                  <Switch
-                    testID="auto-navigate-to-chat-switch"
-                    value={uiStore.autoNavigatetoChat}
-                    onValueChange={value =>
-                      uiStore.setAutoNavigateToChat(value)
-                    }
-                  />
-                </View>
-              </View>
-            </Card.Content>
-          </Card>
-
-          {/* UI Settings */}
-          <Card elevation={0} style={styles.card}>
-            <Card.Title title={l10n.settings.appSettings} />
-            <Card.Content>
-              <View style={styles.settingItemContainer}>
-                {/* Language Selection */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <View style={styles.labelWithIconContainer}>
-                      <GlobeIcon
-                        width={20}
-                        height={20}
-                        style={styles.settingIcon}
-                        stroke={theme.colors.onSurface}
-                      />
-                      <Text variant="titleMedium" style={styles.textLabel}>
-                        {l10n.settings.language}
-                      </Text>
-                    </View>
-                  </View>
-                  <LanguageSelector />
-                </View>
-                <Divider />
-
-                {/* Dark Mode */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <View style={styles.labelWithIconContainer}>
-                      <MoonIcon
-                        width={20}
-                        height={20}
-                        style={styles.settingIcon}
-                        stroke={theme.colors.onSurface}
-                      />
-                      <Text variant="titleMedium" style={styles.textLabel}>
-                        {l10n.settings.darkMode}
-                      </Text>
-                    </View>
-                  </View>
-                  <Switch
-                    testID="dark-mode-switch"
-                    value={uiStore.colorScheme === 'dark'}
-                    onValueChange={value =>
-                      uiStore.setColorScheme(value ? 'dark' : 'light')
-                    }
-                  />
-                </View>
-                <Divider />
-
-                {/* Text-to-speech availability toggle */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <View style={styles.labelWithIconContainer}>
-                      <VolumeOnIcon
-                        width={20}
-                        height={20}
-                        style={styles.settingIcon}
-                        stroke={theme.colors.onSurface}
-                      />
-                      <Text variant="titleMedium" style={styles.textLabel}>
-                        {l10n.settings.ttsAvailability}
-                      </Text>
-                    </View>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.ttsAvailabilityDescription}
-                    </Text>
-                    {!ttsStore.deviceMeetsMemory && (
-                      <Text variant="labelSmall" style={styles.textDescription}>
-                        {l10n.settings.ttsAvailabilityLowMemoryWarning}
-                      </Text>
-                    )}
-                  </View>
-                  <Switch
-                    testID="tts-availability-switch"
-                    value={
-                      ttsStore.userTTSOverride ?? ttsStore.deviceMeetsMemory
-                    }
-                    onValueChange={value => ttsStore.setUserTTSOverride(value)}
-                  />
-                </View>
-
-                {/* Display Memory Usage (iOS only) */}
-                {Platform.OS === 'ios' && (
-                  <>
-                    <Divider />
-                    <View style={styles.switchContainer}>
-                      <View style={styles.textContainer}>
-                        <View style={styles.labelWithIconContainer}>
-                          <CpuChipIcon
-                            width={20}
-                            height={20}
-                            style={styles.settingIcon}
-                            stroke={theme.colors.onSurface}
-                          />
-                          <Text variant="titleMedium" style={styles.textLabel}>
-                            {l10n.settings.displayMemoryUsage}
-                          </Text>
-                        </View>
-                        <Text
-                          variant="labelSmall"
-                          style={styles.textDescription}>
-                          {l10n.settings.displayMemoryUsageDescription}
-                        </Text>
-                      </View>
-                      <Switch
-                        testID="display-memory-usage-switch"
-                        value={uiStore.displayMemUsage}
-                        onValueChange={value =>
-                          uiStore.setDisplayMemUsage(value)
-                        }
-                      />
-                    </View>
-                  </>
-                )}
-              </View>
-            </Card.Content>
-          </Card>
-
-          {/* Internet Search */}
-          <Card elevation={0} style={styles.card} testID="internet-search-card">
-            <Card.Title title={l10n.settings.internetSearch.title} />
-            <Card.Content>
-              <View style={styles.settingItemContainer}>
-                <Text variant="labelSmall" style={styles.textDescription}>
-                  {l10n.settings.internetSearch.description}
-                </Text>
-
-                {/* First-enable consent gate / revoke affordance */}
-                {!searchHasConsent ? (
-                  <View
-                    testID="internet-search-consent"
-                    style={styles.consentContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.internetSearch.consentTitle}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.internetSearch.consentDescription}
-                    </Text>
-                    <Button
-                      testID="internet-search-consent-accept"
-                      mode="contained"
-                      onPress={() => searchProviderStore.setConsent(true)}
-                      style={styles.consentButton}>
-                      {l10n.settings.internetSearch.consentAccept}
-                    </Button>
-                  </View>
-                ) : (
-                  <View
-                    testID="internet-search-consent-given"
-                    style={styles.consentContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.internetSearch.consentGivenTitle}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.internetSearch.consentGivenDescription}
-                    </Text>
-                    <Button
-                      testID="internet-search-consent-revoke"
-                      mode="outlined"
-                      onPress={() => searchProviderStore.setConsent(false)}
-                      style={styles.consentButton}>
-                      {l10n.settings.internetSearch.consentRevoke}
-                    </Button>
-                  </View>
-                )}
-
-                {/* Provider picker */}
-                <Divider style={styles.divider} />
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.internetSearch.providerLabel}
-                    </Text>
-                  </View>
-                  <View style={styles.menuContainer}>
-                    <Button
-                      ref={searchProviderButtonRef}
-                      testID="search-provider-selector-button"
-                      mode="outlined"
-                      onPress={handleSearchProviderPress}
-                      style={styles.menuButton}
-                      contentStyle={styles.buttonContent}
-                      icon={({size, color}) => (
-                        <Icon source="chevron-down" size={size} color={color} />
-                      )}>
-                      {activeSearchProvider?.label ?? activeSearchProviderId}
-                    </Button>
-                    <Menu
-                      visible={showSearchProviderMenu}
-                      onDismiss={() => setShowSearchProviderMenu(false)}
-                      anchor={searchProviderAnchor}
-                      selectable>
-                      {searchProviderStore.providers.map(provider => (
-                        <Menu.Item
-                          key={provider.id}
-                          testID={`search-provider-option-${provider.id}`}
-                          disabled={!provider.selectable}
-                          style={styles.menu}
-                          label={
-                            provider.selectable
-                              ? provider.label
-                              : `${provider.label} (${l10n.settings.internetSearch.providerGated})`
-                          }
-                          selected={provider.id === activeSearchProviderId}
-                          onPress={() => {
-                            searchProviderStore.setActiveProvider(
-                              provider.id as SearchProviderId,
-                            );
-                            setShowSearchProviderMenu(false);
-                          }}
-                        />
-                      ))}
-                    </Menu>
-                  </View>
-                </View>
-
-                {/* Per-provider BYOK key entry */}
-                <Divider style={styles.divider} />
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.internetSearch.keyLabel}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {searchProviderStore.hasKey(activeSearchProviderId)
-                        ? t(l10n.settings.internetSearch.keyIsSet, {
-                            provider:
-                              activeSearchProvider?.label ??
-                              activeSearchProviderId,
-                          })
-                        : t(l10n.settings.internetSearch.keyNotSet, {
-                            provider:
-                              activeSearchProvider?.label ??
-                              activeSearchProviderId,
-                          })}
-                    </Text>
-                    {!searchHasConsent && (
-                      <Text variant="labelSmall" style={styles.textDescription}>
-                        {l10n.settings.internetSearch.consentRequired}
-                      </Text>
-                    )}
-                  </View>
-                  <Button
-                    testID="search-provider-key-button"
-                    mode="outlined"
-                    disabled={!searchHasConsent}
-                    onPress={() => setShowSearchKeySheet(true)}
-                    style={styles.menuButton}>
-                    {searchProviderStore.hasKey(activeSearchProviderId)
-                      ? l10n.settings.internetSearch.updateKeyButton
-                      : l10n.settings.internetSearch.setKeyButton}
-                  </Button>
-                </View>
-
-                {/* Result-count control */}
-                <Divider style={styles.divider} />
-                <View style={styles.textContainer}>
-                  <Text variant="titleMedium" style={styles.textLabel}>
-                    {l10n.settings.internetSearch.resultCountLabel}
-                  </Text>
-                  <InputSlider
-                    testID="search-result-count-slider"
-                    accessibilityLabel={
-                      l10n.settings.internetSearch.resultCountLabel
-                    }
-                    value={searchProviderStore.resultCount}
-                    onValueChange={value =>
-                      searchProviderStore.setResultCount(Math.round(value))
-                    }
-                    min={1}
-                    max={8}
-                    step={1}
-                  />
-                  <Text variant="labelSmall" style={styles.textDescription}>
-                    {l10n.settings.internetSearch.resultCountDescription}
-                  </Text>
-                </View>
-              </View>
-            </Card.Content>
-          </Card>
-
-          {/* API Settings */}
-          <Card elevation={0} style={styles.card}>
-            <Card.Title title={l10n.settings.apiSettingsTitle} />
-            <Card.Content>
-              <View style={styles.settingItemContainer}>
-                {/* Hugging Face Token */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.huggingFaceTokenLabel}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {hfStore.isTokenPresent
-                        ? l10n.settings.tokenIsSetDescription
-                        : l10n.settings.setTokenDescription}
-                    </Text>
-                  </View>
-                  <Button
-                    mode="outlined"
-                    onPress={() => setShowHfTokenDialog(true)}
-                    style={styles.menuButton}>
-                    {hfStore.isTokenPresent
-                      ? l10n.common.update
-                      : l10n.settings.setTokenButton}
-                  </Button>
-                </View>
-
-                {/* Use HF Token Switch */}
-                <Divider style={styles.divider} />
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.useHfTokenLabel}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.useHfTokenDescription}
-                    </Text>
-                  </View>
-                  <Switch
-                    testID="use-hf-token-switch"
-                    value={hfStore.useHfToken}
-                    disabled={!hfStore.isTokenPresent}
-                    onValueChange={value => hfStore.setUseHfToken(value)}
-                  />
-                </View>
-              </View>
-            </Card.Content>
-          </Card>
-
-          {/* Cache & Storage Settings - iOS only (for Shortcuts) */}
-          {Platform.OS === 'ios' && (
-            <Card elevation={0} style={styles.card}>
-              <Card.Title title={l10n.settings.cacheStorageTitle} />
-              <Card.Content>
-                <View style={styles.settingItemContainer}>
-                  {/* Clear Shortcuts Caches */}
-                  <View style={styles.switchContainer}>
-                    <View style={styles.textContainer}>
-                      <Text variant="titleMedium" style={styles.textLabel}>
-                        {l10n.settings.clearPalCaches}
-                      </Text>
-                      <Text variant="labelSmall" style={styles.textDescription}>
-                        {l10n.settings.clearPalCachesDescription}
-                      </Text>
-                    </View>
-                    <Button
-                      mode="outlined"
-                      onPress={async () => {
-                        try {
-                          const cacheInfo = await getSessionCacheInfo();
-
-                          if (cacheInfo.fileCount === 0) {
-                            Alert.alert(
-                              l10n.settings.clearPalCaches,
-                              l10n.settings.noCachesToClear,
-                            );
-                            return;
-                          }
-
-                          const formattedSize = formatBytes(
-                            cacheInfo.totalSizeBytes,
-                          );
-                          const confirmMessage = t(
-                            l10n.settings.clearCachesConfirmMessage,
-                            {
-                              fileCount: cacheInfo.fileCount.toString(),
-                              size: formattedSize,
-                            },
-                          );
-
-                          Alert.alert(
-                            l10n.settings.clearCachesConfirmTitle,
-                            confirmMessage,
-                            [
-                              {
-                                text: l10n.common.cancel,
-                                style: 'cancel',
-                              },
-                              {
-                                text: l10n.settings.clearCachesButton,
-                                style: 'destructive',
-                                onPress: async () => {
-                                  try {
-                                    const deletedCount =
-                                      await clearAllSessionCaches();
-                                    const successMessage = t(
-                                      l10n.settings.clearCachesSuccess,
-                                      {count: deletedCount.toString()},
-                                    );
-                                    Alert.alert(
-                                      l10n.settings.clearPalCaches,
-                                      successMessage,
-                                    );
-                                  } catch (error) {
-                                    console.error(
-                                      'Failed to clear caches:',
-                                      error,
-                                    );
-                                    Alert.alert(
-                                      l10n.settings.clearPalCaches,
-                                      l10n.settings.clearCachesError,
-                                    );
-                                  }
-                                },
-                              },
-                            ],
-                          );
-                        } catch (error) {
-                          console.error('Failed to get cache info:', error);
-                          Alert.alert(
-                            l10n.settings.clearPalCaches,
-                            l10n.settings.clearCachesError,
-                          );
-                        }
-                      }}
-                      style={styles.menuButton}>
-                      {l10n.settings.clearCachesButton}
-                    </Button>
-                  </View>
-                </View>
-              </Card.Content>
-            </Card>
-          )}
-
-          {/* Export Options */}
-          <Card elevation={0} style={styles.card}>
-            <Card.Title title={l10n.settings.exportOptions} />
-            <Card.Content>
-              <View style={styles.settingItemContainer}>
-                {/* Legacy Export */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <View style={styles.labelWithIconContainer}>
-                      <ShareIcon
-                        width={20}
-                        height={20}
-                        style={styles.settingIcon}
-                        stroke={theme.colors.onSurface}
-                      />
-                      <Text variant="titleMedium" style={styles.textLabel}>
-                        {l10n.settings.exportLegacyChats}
-                      </Text>
-                    </View>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.exportLegacyChatsDescription}
-                    </Text>
-                  </View>
-                  <Button
-                    mode="outlined"
-                    onPress={async () => {
-                      try {
-                        await exportLegacyChatSessions();
-                      } catch {
-                        Alert.alert(
-                          'Export Error',
-                          'Failed to export legacy chat sessions. The file may not exist.',
-                        );
-                      }
-                    }}
-                    style={styles.menuButton}>
-                    {l10n.settings.exportButton}
-                  </Button>
-                </View>
-              </View>
-            </Card.Content>
-          </Card>
         </ScrollView>
       </TouchableWithoutFeedback>
-      <HFTokenSheet
-        isVisible={showHfTokenDialog}
-        onDismiss={() => setShowHfTokenDialog(false)}
-        onSave={() => setShowHfTokenDialog(false)}
-      />
-      <SearchProviderKeySheet
-        isVisible={showSearchKeySheet}
-        providerId={activeSearchProviderId}
-        providerLabel={activeSearchProvider?.label ?? activeSearchProviderId}
-        onDismiss={() => setShowSearchKeySheet(false)}
-      />
     </SafeAreaView>
   );
 });

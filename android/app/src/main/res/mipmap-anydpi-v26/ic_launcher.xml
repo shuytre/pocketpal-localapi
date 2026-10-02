@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- TwinCore adaptive icon. PNG layers exported from assets/svg/ via
-     scripts/export-svg.js. -->
+<!-- TwinCore adaptive icon (Android 8+, API 26+).
+     Background + foreground are vector drawables (drawable/), not PNG
+     mipmaps: they scale to any mask without per-density exports and the
+     monochrome layer mirrors the foreground for themed icons. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@mipmap/ic_launcher_background" />
-    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
-    <monochrome android:drawable="@mipmap/ic_launcher_foreground" />
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
 </adaptive-icon>

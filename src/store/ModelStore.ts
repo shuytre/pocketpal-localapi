@@ -850,7 +850,7 @@ class ModelStore {
     const hfModel = {
       id: candidate.hfRepo,
       author: candidate.hfRepo.split('/')[0],
-      url: `https://huggingface.co/${candidate.hfRepo}`,
+      url: `https://hf-mirror.com/${candidate.hfRepo}`,
       specs: {gguf: {total: candidate.params ?? 0}},
       siblings,
     } as unknown as HuggingFaceModel;
@@ -868,7 +868,7 @@ class ModelStore {
     const hfModel = {
       id: draft.hfRepo,
       author: draft.hfRepo.split('/')[0],
-      url: `https://huggingface.co/${draft.hfRepo}`,
+      url: `https://hf-mirror.com/${draft.hfRepo}`,
       specs: {gguf: {total: 0}},
       siblings: undefined,
     } as unknown as HuggingFaceModel;
@@ -2925,7 +2925,7 @@ class ModelStore {
     const hfModel: HuggingFaceModel = {
       id: entry.repo,
       author: entry.author,
-      url: `https://huggingface.co/${entry.repo}`,
+      url: `https://hf-mirror.com/${entry.repo}`,
       specs: {gguf: {total: entry.params}},
       siblings: [] as ModelFile[],
     } as HuggingFaceModel;

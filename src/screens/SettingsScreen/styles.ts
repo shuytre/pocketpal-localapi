@@ -2,6 +2,10 @@ import {StyleSheet} from 'react-native';
 
 import {Theme} from '../../utils/types';
 
+/** TwinCore 品牌色：青绿主色及其半透明底（清单打勾 / 完成横幅用）。 */
+const BRAND_OK = '#00E5A0';
+const BRAND_OK_SOFT = 'rgba(0, 229, 160, 0.14)';
+
 export const createStyles = (theme: Theme) =>
   StyleSheet.create({
     safeArea: {
@@ -128,6 +132,14 @@ export const createStyles = (theme: Theme) =>
       marginVertical: 8,
     },
     // ---- TwinCore: 性能模式三横向卡片 ----
+    //
+    // 注意（务必保留这条约束）：卡片渲染宿主是普通 View/Pressable，
+    // 而不是 react-native-paper 的 <Card>（后者会渲染成 <Surface container>，
+    // 背景取 theme.colors.elevation.levelN —— 本 App 的 buildTheme 没提供
+    // elevation 色阶，Surface 背景会是 undefined；再叠 rgba 半透明底会走到
+    // 安卓「透明背景 → 阴影转移到子节点」的兼容分支，实测把卡片渲染成被挖空的
+    // 白块 / 看不见图标文字，即用户截图 #1）。
+    // 因此：卡片底色一律用**不透明实色**，并显式给出文字/图标颜色。
     modeCards: {
       flexDirection: 'row',
       gap: 8,
@@ -135,28 +147,36 @@ export const createStyles = (theme: Theme) =>
     },
     modeCard: {
       flex: 1,
+      minHeight: 76,
+      // 让整张卡（撑满 flex 宽度）都是可点区，避免点在两卡之间的间隙上。
+      justifyContent: 'center',
       alignItems: 'center',
       paddingVertical: 12,
       paddingHorizontal: 4,
       borderRadius: 16,
+      // 用 2px 边框占位，选中态只换颜色，避免选中/未选中尺寸跳动。
       borderWidth: 2,
       borderColor: 'transparent',
-      backgroundColor: theme.colors.surfaceContainerHigh,
+      // 不透明实色：深色主题下比卡片容器（background #0A0E1A）略亮一档，
+      // 保证三张卡始终“看得见”，选中态再用 surfaceVariant 拔高一层。
+      backgroundColor: theme.colors.surface,
     },
     modeCardSelected: {
       borderColor: theme.colors.secondary,
-      backgroundColor: theme.colors.surfaceContainerHighest,
+      backgroundColor: theme.colors.surfaceVariant,
     },
     modeCardIcon: {
       marginBottom: 6,
     },
     modeCardLabel: {
       fontSize: 12,
-      color: theme.colors.onSurfaceVariant,
+      lineHeight: 16,
+      // 不透明底已保证对比度，用 onSurface 而非 onSurfaceVariant，更清晰。
+      color: theme.colors.onSurface,
       textAlign: 'center',
     },
     modeCardLabelSelected: {
-      color: theme.colors.secondary,
+      color: theme.dark ? theme.colors.secondary : theme.colors.primary,
       fontWeight: '700',
     },
     // ---- TwinCore: Shizuku 状态彩点（绿/黄/红） ----
@@ -165,5 +185,59 @@ export const createStyles = (theme: Theme) =>
       height: 8,
       borderRadius: 4,
       marginRight: 6,
+    },
+    // ---- TwinCore: 性能模式「分步引导清单」 ----
+    checklistRow: {
+      marginVertical: 8,
+    },
+    // 整行（勾选框 + 文字）可点：扩大命中区，避免只点中小方块。
+    checklistRowInner: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+    },
+    checklistCheck: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: theme.colors.onSurfaceVariant,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 12,
+      marginTop: 2,
+    },
+    checklistCheckDone: {
+      borderColor: BRAND_OK,
+      backgroundColor: BRAND_OK,
+    },
+    checklistTextContainer: {
+      flex: 1,
+      marginRight: 8,
+    },
+    checklistTitle: {
+      marginBottom: 2,
+    },
+    checklistActionButton: {
+      alignSelf: 'flex-start',
+      marginTop: 8,
+      marginLeft: 36,
+    },
+    checklistBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderRadius: 12,
+      marginBottom: 8,
+      backgroundColor: BRAND_OK_SOFT,
+    },
+    checklistBannerText: {
+      marginLeft: 8,
+      color: BRAND_OK,
+      fontWeight: '700',
+    },
+    checklistFooterNote: {
+      flex: 1,
+      marginLeft: 8,
     },
   });

@@ -24,7 +24,9 @@ import {summarizeCalls} from '../services/localApi/localApiBridge';
 /** 默认值集中在这里；UI 与推荐 profile 都以它为基准改。 */
 const DEFAULTS = {
   port: 8080,
-  apiKey: '',
+  // 需求 6：固定默认 key。TwinCore 的客户端配置统一用 twin-core，
+  // 打开「Require API key」后无需用户再手动想一个。
+  apiKey: 'twin-core',
   requireApiKey: false,
   allowCors: true,
   corsAllowOrigin: '*',
@@ -66,6 +68,14 @@ class LocalApiStore {
    * 找到开关再点一次。用户仍然可以关掉，关掉后一切回到改造前的状态。
    */
   serviceEnabled = true;
+  /**
+   * 需求 6：是否对局域网开放。
+   *
+   * 关闭时页面上只显示回环地址（127.0.0.1）—— 服务仍在监听（native 侧绑定
+   * 0.0.0.0 不做改动），但 UI 只把本机地址作为「接入信息」给出，避免用户误以为
+   * 已可从其它设备访问。打开时额外给出局域网 IP。
+   */
+  lanAccessEnabled = true;
   autoStartOnBoot = true;
   keepModelResident = true;
   mlockEnabled = true;
@@ -132,6 +142,7 @@ class LocalApiStore {
       properties: [
         'serviceEnabled',
         'autoStartOnBoot',
+        'lanAccessEnabled',
         'keepModelResident',
         'mlockEnabled',
         'port',
@@ -187,6 +198,27 @@ class LocalApiStore {
   get baseUrls(): string[] {
     const port = this.status?.port ?? this.port;
     return this.ipAddresses.map(ip => `http://${ip}:${port}/v1`);
+  }
+
+  /** 端口（native 回读优先，未启动时用配置值）。 */
+  get effectivePort(): number {
+    return this.status?.port ?? this.port;
+  }
+
+  /** 局域网 Base URL（如 http://192.168.x.x:8080/v1）。 */
+  get lanBaseUrls(): string[] {
+    return this.ipAddresses.map(ip => `http://${ip}:${this.effectivePort}/v1`);
+  }
+
+  /**
+   * 本机（回环）Base URL。
+   *
+   * 用 127.0.0.1 而不是 localhost：部分编码 Agent 的 HTTP 客户端在 Android
+   * 上对 localhost 的解析不稳定（可能命中 IPv6 ::1），直给 IPv4 回环最省事。
+   */
+  get localBaseUrls(): string[] {
+    const port = this.effectivePort;
+    return [`http://127.0.0.1:${port}/v1`, `http://localhost:${port}/v1`];
   }
 
   get callStats(): CallStats {

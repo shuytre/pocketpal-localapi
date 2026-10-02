@@ -5,7 +5,7 @@ import {useNavigation} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Clipboard from '@react-native-clipboard/clipboard';
-import {Button, Card, Divider, Switch, Text} from 'react-native-paper';
+import {Button, Card, Divider, Snackbar, Switch, Text} from 'react-native-paper';
 
 import {L10nContext} from '../../utils';
 import {useTheme} from '../../hooks';
@@ -76,6 +76,9 @@ export const LocalApiScreen: React.FC = observer(() => {
   const [showPerformance, setShowPerformance] = useState(false);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  // 轻提示：复制成功用 Snackbar 反馈（比按钮文字变「已复制」更醒目，
+  // 且不会因为多处复制而互相覆盖状态）。
+  const [snackbar, setSnackbar] = useState<string | null>(null);
 
   useEffect(() => {
     setPortDraft(String(localApiStore.port));
@@ -138,11 +141,12 @@ export const LocalApiScreen: React.FC = observer(() => {
     void localApiStore.applyRuntimeConfig();
   };
 
-  const onCopy = async (value: string, key: string) => {
+  const onCopy = async (value: string, key: string, notice?: string) => {
     try {
       await Clipboard.setString(value);
       setCopied(key);
       setTimeout(() => setCopied(null), 1500);
+      setSnackbar(notice ?? l10n.localApi.copied);
     } catch {
       // 剪贴板不可用时保持静默：Base URL 仍然可读、可手抄。
     }
@@ -183,7 +187,8 @@ export const LocalApiScreen: React.FC = observer(() => {
 
   const report = localApiStore.tuningReport;
   const stats = localApiStore.callStats;
-  const baseUrls = localApiStore.baseUrls;
+  const lanBaseUrls = localApiStore.lanBaseUrls;
+  const localBaseUrls = localApiStore.localBaseUrls;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
@@ -248,30 +253,86 @@ export const LocalApiScreen: React.FC = observer(() => {
 
             <Divider />
 
+            {/* 需求 6：局域网访问开关。关闭时只显示本机地址。 */}
+            <View style={styles.row}>
+              <View style={styles.rowText}>
+                <Text variant="titleMedium" style={styles.label}>
+                  {l10n.localApi.lanAccess}
+                </Text>
+                <Text variant="labelSmall" style={styles.description}>
+                  {l10n.localApi.lanAccessDescription}
+                </Text>
+              </View>
+              <Switch
+                testID="local-api-lan-switch"
+                value={localApiStore.lanAccessEnabled}
+                onValueChange={value => {
+                  localApiStore.lanAccessEnabled = value;
+                }}
+              />
+            </View>
+
+            <Divider />
+
             <View style={styles.row}>
               <View style={styles.rowText}>
                 <Text variant="titleMedium" style={styles.label}>
                   {l10n.localApi.baseUrl}
                 </Text>
-                {baseUrls.length === 0 ? (
-                  <Text variant="labelSmall" style={styles.description}>
-                    {l10n.localApi.baseUrlEmpty}
-                  </Text>
-                ) : (
-                  baseUrls.map(url => (
-                    <View key={url} style={styles.chipRow}>
-                      <Text style={[styles.mono, styles.urlText]} selectable>
-                        {url}
+
+                {/* 局域网地址（仅当「允许局域网访问」打开时显示），
+                    其下方再给出本机地址。两个都能点击复制。 */}
+                {localApiStore.lanAccessEnabled && (
+                  <View style={styles.urlGroup}>
+                    <Text variant="labelSmall" style={styles.description}>
+                      {l10n.localApi.lanBaseUrlLabel}
+                    </Text>
+                    {lanBaseUrls.length === 0 ? (
+                      <Text variant="labelSmall" style={styles.description}>
+                        {l10n.localApi.lanIpEmpty}
                       </Text>
-                      <Button
-                        compact
-                        onPress={() => void onCopy(url, url)}
-                        testID={`copy-base-url-${url}`}>
-                        {copied === url ? l10n.localApi.copied : l10n.localApi.copy}
-                      </Button>
-                    </View>
-                  ))
+                    ) : (
+                      lanBaseUrls.map(url => (
+                        <View key={url} style={styles.chipRow}>
+                          <Text style={[styles.mono, styles.urlText]} selectable>
+                            {url}
+                          </Text>
+                          <Button
+                            compact
+                            onPress={() => void onCopy(url, url)}
+                            testID={`copy-base-url-${url}`}>
+                            {copied === url ? l10n.localApi.copied : l10n.localApi.copy}
+                          </Button>
+                        </View>
+                      ))
+                    )}
+                  </View>
                 )}
+
+                <View style={styles.urlGroup}>
+                  <Text variant="labelSmall" style={styles.description}>
+                    {l10n.localApi.localBaseUrlLabel}
+                  </Text>
+                  {localBaseUrls.length === 0 ? (
+                    <Text variant="labelSmall" style={styles.description}>
+                      {l10n.localApi.baseUrlEmpty}
+                    </Text>
+                  ) : (
+                    localBaseUrls.map(url => (
+                      <View key={url} style={styles.chipRow}>
+                        <Text style={[styles.mono, styles.urlText]} selectable>
+                          {url}
+                        </Text>
+                        <Button
+                          compact
+                          onPress={() => void onCopy(url, url)}
+                          testID={`copy-base-url-${url}`}>
+                          {copied === url ? l10n.localApi.copied : l10n.localApi.copy}
+                        </Button>
+                      </View>
+                    ))
+                  )}
+                </View>
               </View>
             </View>
 
@@ -311,6 +372,24 @@ export const LocalApiScreen: React.FC = observer(() => {
                   secureTextEntry={false}
                   autoCapitalize="none"
                 />
+                {/* 需求 6：key 展示 + 一键复制（客户端配置要用）。 */}
+                <View style={styles.chipRow}>
+                  <Text style={[styles.mono, styles.urlText]} selectable>
+                    {localApiStore.apiKey || '—'}
+                  </Text>
+                  <Button
+                    compact
+                    disabled={!localApiStore.apiKey}
+                    onPress={() =>
+                      void onCopy(localApiStore.apiKey, 'api-key', l10n.localApi.copied)
+                    }
+                    testID="copy-api-key">
+                    {copied === 'api-key' ? l10n.localApi.copied : l10n.localApi.copy}
+                  </Button>
+                </View>
+                <Text variant="labelSmall" style={styles.description}>
+                  {l10n.localApi.apiKeyFixedHint}
+                </Text>
               </View>
               <Switch
                 testID="local-api-require-key-switch"
@@ -957,6 +1036,13 @@ export const LocalApiScreen: React.FC = observer(() => {
 
 
       </ScrollView>
+
+      <Snackbar
+        visible={snackbar != null}
+        duration={1600}
+        onDismiss={() => setSnackbar(null)}>
+        {snackbar ?? ''}
+      </Snackbar>
     </SafeAreaView>
   );
 });

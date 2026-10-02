@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TwinCore adaptive-icon foreground layer: the twin-core mark
+     (performance core + efficiency core + dual lanes + hollow node).
+
+     Adaptive-icon geometry: the 108x108 canvas is masked by the launcher
+     (circle / squircle / rounded square), and only the central 72x72
+     region is guaranteed visible. The 512-unit mark is therefore scaled
+     to 0.62 and centred inside a 108-unit viewport:
+       512 * 0.62 = 317.4  ->  (108 - 83.4*... )  see transform below.
+     Group transform: scale 0.62 about the mark centre (256,256) then
+     translate so the scaled mark centres on the 108-grid centre (54,54).
+       sx = 54 - 256*0.62 = 54 - 158.72 = -104.72
+     Everything stays inside the 72x72 safe circle, so no clipping. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <group
+        android:translateX="-104.72"
+        android:translateY="-104.72"
+        android:scaleX="0.62"
+        android:scaleY="0.62">
+
+        <!-- Dual lanes (CPU + NPU channels) -->
+        <path
+            android:pathData="M300,256 L432,256"
+            android:strokeColor="#00E5A0"
+            android:strokeWidth="15"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M212,256 L80,256"
+            android:strokeColor="#00E5A0"
+            android:strokeWidth="15"
+            android:strokeLineCap="round" />
+
+        <!-- Performance core (upper) -->
+        <path
+            android:pathData="M204,112 L308,112 A28,28 0 0 1 336,140 L336,192 A28,28 0 0 1 308,220 L204,220 A28,28 0 0 1 176,192 L176,140 A28,28 0 0 1 204,112 Z"
+            android:fillColor="#00E5A0" />
+        <path
+            android:pathData="M212.5,152.5 L299.5,152.5"
+            android:strokeColor="#B30A0E1A"
+            android:strokeWidth="13"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M212.5,178.5 L267.5,178.5"
+            android:strokeColor="#B30A0E1A"
+            android:strokeWidth="13"
+            android:strokeLineCap="round" />
+
+        <!-- Efficiency core (lower) -->
+        <path
+            android:pathData="M204,292 L308,292 A28,28 0 0 1 336,320 L336,372 A28,28 0 0 1 308,400 L204,400 A28,28 0 0 1 176,372 L176,320 A28,28 0 0 1 204,292 Z"
+            android:fillColor="#00B283" />
+        <path
+            android:pathData="M212.5,332.5 L299.5,332.5"
+            android:strokeColor="#B30A0E1A"
+            android:strokeWidth="13"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M212.5,358.5 L267.5,358.5"
+            android:strokeColor="#B30A0E1A"
+            android:strokeWidth="13"
+            android:strokeLineCap="round" />
+
+        <!-- Bridge + hollow node -->
+        <path
+            android:pathData="M256,224 L256,236 M256,276 L256,288"
+            android:strokeColor="#F1F5F9"
+            android:strokeWidth="15"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M256,226 L286,256 L256,286 L226,256 Z"
+            android:fillColor="#F1F5F9" />
+        <path
+            android:pathData="M256,243 L269,256 L256,269 L243,256 Z"
+            android:fillColor="#0A0E1A" />
+    </group>
+</vector>

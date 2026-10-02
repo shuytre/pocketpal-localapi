@@ -63,6 +63,12 @@ export interface TwinCorePerfReport {
   applied: string[];
   /** 读回校验失败的项（含原因描述） */
   failures: string[];
+  /**
+   * 底层错误明细（可选）：shell stderr、逐项写入的 rc/errno、重试结果。
+   * 用于回答「为什么写不进去」（Permission denied / Read-only fs / EINVAL /
+   * perfd 覆写），比只有「期望/实际」可诊断得多。原生可能不返回该字段。
+   */
+  rawErrors?: string[];
   /** applied 非空且 failures 为空 */
   fullyApplied: boolean;
   binderAlive: boolean;
@@ -75,6 +81,26 @@ export interface TwinCorePerfReport {
   maxFreqKhz: number;
   /** 实际执行过的 shell 命令，便于排查 */
   commands: string[];
+  message: string;
+}
+
+/**
+ * 需求 7：智能模式（杀后台）的执行报告。
+ *
+ * 与调频报告同风格：成功项进 killed、失败项进 failures，绝不粉饰。
+ * `ok` 只在「已授权 + 无失败」时为 true。
+ */
+export interface TwinCoreKillReport {
+  ok: boolean;
+  binderAlive: boolean;
+  granted: boolean;
+  /** 被 force-stop 的第三方包数量 */
+  killedCount: number;
+  /** 被 force-stop 的第三方包名（白名单外的，系统包与 Shizuku 不在其中） */
+  killed: string[];
+  /** 实际执行过的 shell 命令，便于排查 */
+  commands: string[];
+  failures: string[];
   message: string;
 }
 
@@ -108,6 +134,15 @@ export interface Spec extends TurboModule {
 
   /** 恢复到首次调频前的 governor / scaling_min_freq。 */
   restorePerformanceMode(): Promise<TwinCorePerfReport>;
+
+  /**
+   * 需求 7：智能模式 —— 杀掉非系统后台进程（只保留 Shizuku 与本应用）。
+   *
+   * 原生侧用 `am kill-all` 作主命令（系统进程/前台/persistent 由系统保护），
+   * 再对白名单外的第三方包逐个 `am force-stop`，绝不使用 kill -9，
+   * 也绝不 force-stop 系统包。未授权时只回报告、不执行任何操作。
+   */
+  killBackgroundProcesses(): Promise<TwinCoreKillReport>;
 }
 
 export default TurboModuleRegistry.get<Spec>('TwinCorePerfModule');

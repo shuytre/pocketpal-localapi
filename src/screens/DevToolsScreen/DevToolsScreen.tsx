@@ -49,7 +49,7 @@ const MenuButton = ({
   navigation,
 }: {
   navigation: DevToolsScreenNavigationProp;
-}) => <IconButton icon="menu" onPress={() => navigation.openDrawer()} />;
+}) => <IconButton icon="arrow-left" onPress={() => navigation.goBack()} />;
 
 // Main DevTools Home Screen
 const DevToolsHomeScreen: React.FC = () => {

@@ -113,6 +113,10 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
     /** 性能档把小核的下限抬到最高频的这个比例（大核直接锁顶）。 */
     private const val PERF_SMALL_MIN_RATIO = 0.60f
 
+    /** 单项写入读回不通过时的补写次数与间隔（MIUI perfd 偶尔会瞬时覆写）。 */
+    private const val RETRY_COUNT = 3
+    private const val RETRY_INTERVAL_MS = 120L
+
     /** Shizuku 相关包名。老版本 Manager 与现行 Shizuku app 的包名不同，两个都探测。 */
     private const val SERVICE_PACKAGE = "moe.shizuku.privileged.api"
     private const val MANAGER_PACKAGE = "moe.shizuku.manager"
@@ -273,18 +277,43 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
         val result = runPrivilegedShell(commands)
         val failures = mutableListOf<String>()
         val appliedItems = mutableListOf<String>()
+        // 底层原因累积：把 shell stderr 与逐项 errno 都攒下来，随 report 透出。
+        val rawErrors = mutableListOf<String>()
         if (result.error != null) {
           failures.add("shell 执行失败（${result.transport}）：${result.error}")
         }
+        if (result.stderr.isNotBlank()) {
+          rawErrors.add("stderr: ${result.stderr.trim().take(600)}")
+        }
 
-        // 逐项读回校验。单项失败不中断整体 —— MIUI perfd 经常只覆写其中几项。
+        // 逐项读回校验 + 失败重试。单项彻底失败也不中断整体
+        // —— MIUI perfd 经常只覆写其中几项。
         for (op in targets) {
-          val actual = readText(op.path)
+          val label = opLabel(op.path)
+          var actual = readText(op.path)
+          var attempts = 0
+          // 首次已由批量脚本写过；这里最多再补写 RETRY_COUNT 次。
+          while (actual != op.value && attempts < RETRY_COUNT) {
+            if (attempts > 0) {
+              Thread.sleep(RETRY_INTERVAL_MS)
+            }
+            attempts++
+            val retry = runPrivilegedShell(listOf(write(op.path, op.value)))
+            if (retry.stderr.isNotBlank()) {
+              rawErrors.add("$label 重试 stderr: ${retry.stderr.trim().take(300)}")
+            }
+            val why = parseWriteResult(retry.stdout, op.path)
+            if (why != null) {
+              rawErrors.add("$label 写入结果 $why")
+            }
+            actual = readText(op.path)
+          }
           if (actual == op.value) {
-            appliedItems.add(opLabel(op.path))
+            appliedItems.add(label)
           } else {
             failures.add(
-                "写入未生效 ${opLabel(op.path)}：期望 ${op.value}，实际 ${actual.ifEmpty { "<读不到>" }}",
+                "写入未生效 $label：期望 ${op.value}，实际 ${actual.ifEmpty { "<读不到>" }}" +
+                    (if (attempts > 0) "（已重试 $attempts 次）" else ""),
             )
           }
         }
@@ -302,6 +331,7 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
                 policies = policies,
                 commands = commands,
                 failures = failures,
+                rawErrors = rawErrors,
                 message =
                     when {
                       failures.isEmpty() && appliedItems.isNotEmpty() ->
@@ -409,7 +439,7 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
           // 顺序很关键：先把 min 压到最低，再写 max，最后写回 min，
           // 否则「当前 min > 目标 max」时内核会拒绝。
           if (min > 0) {
-            commands.add(write("${p.base}/scaling_min_freq", p.cpuinfoMin.toString()))
+            commands.add(writePlain("${p.base}/scaling_min_freq", p.cpuinfoMin.toString()))
           }
           if (max > 0) {
             val op = WriteOp("${p.base}/scaling_max_freq", max.toString())
@@ -431,14 +461,30 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
         val result = runPrivilegedShell(commands)
         val failures = mutableListOf<String>()
         val appliedItems = mutableListOf<String>()
+        val rawErrors = mutableListOf<String>()
         if (result.error != null) failures.add("shell 执行失败：${result.error}")
+        if (result.stderr.isNotBlank()) {
+          rawErrors.add("stderr: ${result.stderr.trim().take(600)}")
+        }
         for (op in targets) {
-          val actual = readText(op.path)
+          val label = opLabel(op.path)
+          var actual = readText(op.path)
+          var attempts = 0
+          while (actual != op.value && attempts < RETRY_COUNT) {
+            if (attempts > 0) {
+              Thread.sleep(RETRY_INTERVAL_MS)
+            }
+            attempts++
+            val retry = runPrivilegedShell(listOf(write(op.path, op.value)))
+            parseWriteResult(retry.stdout, op.path)?.let { rawErrors.add("$label 写入结果 $it") }
+            actual = readText(op.path)
+          }
           if (actual == op.value) {
-            appliedItems.add(opLabel(op.path))
+            appliedItems.add(label)
           } else {
             failures.add(
-                "恢复未生效 ${opLabel(op.path)}：期望 ${op.value}，实际 ${actual.ifEmpty { "<读不到>" }}",
+                "恢复未生效 $label：期望 ${op.value}，实际 ${actual.ifEmpty { "<读不到>" }}" +
+                    (if (attempts > 0) "（已重试 $attempts 次）" else ""),
             )
           }
         }
@@ -454,6 +500,7 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
                 policies = policies,
                 commands = commands,
                 failures = failures,
+                rawErrors = rawErrors,
                 message =
                     if (failures.isEmpty()) "已恢复原始调频设置。"
                     else "恢复不完整：${appliedItems.size} 项成功，${failures.size} 项未写入。",
@@ -464,6 +511,136 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
         promise.resolve(emptyReport("balanced", "恢复异常：${t.message}"))
       }
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // 需求 7：智能模式 —— 杀非系统后台进程
+  // ---------------------------------------------------------------------------
+
+  /**
+   * 智能模式：杀掉所有非系统后台进程，只保留 Shizuku 与本应用。
+   *
+   * 安全策略（无 root，走已有 Shizuku UserService）：
+   *  1. 主命令用 `am kill-all` —— ActivityManager 只杀「可杀的」后台进程，
+   *     系统进程、前台进程、persistent 进程由系统自动保护，绝不使用 kill -9。
+   *  2. 再对第三方包（`pm list packages -3`）逐个 `am force-stop`，
+   *     但白名单（本应用 / Shizuku app / Shizuku Manager）永不触碰。
+   *     不用 `pm list packages -s`（系统包），从源头避免误杀系统进程。
+   *  3. 整个过程 try/catch，任何异常都只回一个失败报告，绝不崩。
+   */
+  override fun killBackgroundProcesses(promise: Promise) {
+    executor.execute {
+      try {
+        val alive = binderAliveSafe()
+        val granted = alive && hasPermissionSafe()
+        if (!granted) {
+          promise.resolve(
+              killReport(
+                  killed = emptyList(),
+                  alive = alive,
+                  granted = false,
+                  commands = emptyList(),
+                  failures = listOf("没有 Shizuku 授权，未执行任何杀后台操作。"),
+                  message = "未授权：请先在 Shizuku 状态卡片里完成授权。",
+              ),
+          )
+          return@execute
+        }
+
+        val whitelist = mutableSetOf(
+            SERVICE_PACKAGE,
+            MANAGER_PACKAGE,
+            reactApplicationContext.packageName,
+            "com.twincore",
+            "com.pocketpal",
+        )
+        // 白名单里放本应用自身包名（含 e2e 后缀变体）与 Shizuku 两个包。
+        SHIZUKU_PACKAGES.forEach { whitelist.add(it) }
+
+        // 先枚举第三方包，过滤白名单。命令本身不报错时 stdout 为逐行包名。
+        val listRes = runPrivilegedShell(listOf("pm list packages -3"))
+        val thirdParty =
+            listRes.stdout
+                .split("\n")
+                .map { it.trim() }
+                .filter { it.startsWith("package:") }
+                .map { it.removePrefix("package:").trim() }
+                .filter { it.isNotEmpty() && !whitelist.contains(it) }
+                .distinct()
+
+        val commands = mutableListOf<String>()
+        // 1) 安全主命令：只杀后台，系统进程/前台/persistent 由系统保护。
+        commands.add("am kill-all")
+        // 2) 第三方包逐个 force-stop（已在白名单外，绝不碰系统包与 Shizuku）。
+        //    加 `|| true`：某个包正被系统占用时 force-stop 会失败，不应中断整批。
+        thirdParty.forEach { pkg -> commands.add("am force-stop $pkg || true") }
+
+        val result = runPrivilegedShell(commands)
+        val failures = mutableListOf<String>()
+        if (result.error != null) {
+          failures.add("shell 执行失败（${result.transport}）：${result.error}")
+        }
+
+        promise.resolve(
+            killReport(
+                killed = thirdParty,
+                alive = alive,
+                granted = true,
+                commands = commands,
+                failures = failures,
+                message =
+                    if (failures.isEmpty())
+                        "已杀后台：${thirdParty.size} 个第三方应用（系统进程与 Shizuku 未触碰）。"
+                    else "部分完成：${thirdParty.size} 个第三方应用，${failures.size} 条失败。",
+            ),
+        )
+      } catch (t: Throwable) {
+        Log.e(TAG, "killBackgroundProcesses failed", t)
+        promise.resolve(
+            killReport(
+                killed = emptyList(),
+                alive = binderAliveSafe(),
+                granted = false,
+                commands = emptyList(),
+                failures = listOf("杀后台异常：${t.message}"),
+                message = "杀后台异常，已中止（未执行破坏性操作）。",
+            ),
+        )
+      }
+    }
+  }
+
+  private fun killReport(
+      killed: List<String>,
+      alive: Boolean,
+      granted: Boolean,
+      commands: List<String>,
+      failures: List<String>,
+      message: String,
+  ): WritableMap = Arguments.createMap().apply {
+    putBoolean("ok", granted && failures.isEmpty())
+    putBoolean("binderAlive", alive)
+    putBoolean("granted", granted)
+    putInt("killedCount", killed.size)
+    putArray(
+        "killed",
+        Arguments.createArray().apply {
+          killed.forEach { pushString(it) }
+        },
+    )
+    putArray(
+        "commands",
+        Arguments.createArray().apply {
+          commands.forEach { pushString(it) }
+        },
+    )
+    putArray(
+        "failures",
+        Arguments.createArray().apply {
+          failures.forEach { pushString(it) }
+        },
+    )
+    putString("message", message)
   }
 
   // ---------------------------------------------------------------------------
@@ -524,8 +701,14 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
   /**
    * 生成有序命令 + 读回校验目标。
    *
-   * 写入顺序恒为「governor → min(下限) → max → min(目标)」，
-   * 保证任何时刻都不会出现 min > max（内核会直接拒绝这种写入）。
+   * 写入顺序（v2，按内核约束重排，这是本次修复的核心）：
+   *   1) scaling_max_freq = targetMax   —— 先把上限抬到位。若先抬 min 会被内核
+   *      以 EINVAL 拒绝（min > 当前 max），这是用户实测 min_freq 写不进去的主因之一。
+   *   2) scaling_governor = gov         —— 切 governor。performance governor 本身
+   *      会尝试把频率拉到最高，放在 max 已放宽之后才不会被 max 钳住。
+   *   3) scaling_min_freq = targetMin   —— 最后锁下限（此时 max 已 >= targetMin）。
+   *
+   * 恢复走 restorePerformanceMode 的逆序，同样满足「任意时刻 min <= max」。
    */
   private fun buildPlan(mode: String, policies: List<CpuPolicy>): Pair<List<String>, List<WriteOp>> {
     val commands = mutableListOf<String>()
@@ -572,20 +755,17 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
         }
       }
 
-      // 1) governor —— 切换 governor 会重置 min/max，所以必须第一个写
-      val govOp = WriteOp("${p.base}/scaling_governor", gov)
-      commands.add(write(govOp.path, govOp.value))
-      targets.add(govOp)
-
-      // 2) 下限归零，避免下一步写 max 时触发 min > max
-      commands.add(write("${p.base}/scaling_min_freq", p.cpuinfoMin.toString()))
-
-      // 3) 上限
+      // 1) 上限先抬到位（可能低于当前上限则等于压频，同样先写 max 最安全）
       val maxOp = WriteOp("${p.base}/scaling_max_freq", targetMax.toString())
       commands.add(write(maxOp.path, maxOp.value))
       targets.add(maxOp)
 
-      // 4) 目标下限
+      // 2) governor
+      val govOp = WriteOp("${p.base}/scaling_governor", gov)
+      commands.add(write(govOp.path, govOp.value))
+      targets.add(govOp)
+
+      // 3) 目标下限（此时 max 已 >= targetMin，不会被内核拒）
       val minOp = WriteOp("${p.base}/scaling_min_freq", targetMin.toString())
       commands.add(write(minOp.path, minOp.value))
       targets.add(minOp)
@@ -594,8 +774,39 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
     return commands to targets
   }
 
+  /**
+   * 需要读回校验的写入。
+   *
+   * 关键改动（v2）：**不再把 stderr 丢进 /dev/null**。
+   * 旧写法 `echo x > p 2>/dev/null` 会把「Permission denied / Read-only file
+   * system / Invalid argument(EINVAL)」这类内核/内核态 SELinux 的拒绝理由全部
+   * 吃掉，导致 failures 里只有「期望/实际」，用户和我们都看不到真因（正是本次
+   * 要修的 bug）。现在用命令替换把重定向的 stderr 与退出码一并带回 stdout，
+   * 由 Kotlin 侧解析成 errno 文本。
+   *
+   * 输出固定格式（单行，便于 grep）：
+   *   TWINCORE_WRITE rc=<0|非0> path=<节点> err=<错误文本或 write-ok>
+   */
   private fun write(path: String, value: String): String =
-      "chmod 644 $path 2>/dev/null; echo '$value' > $path 2>/dev/null; echo \"W $path=$(cat $path 2>/dev/null)\""
+      "o=\$({ echo '$value' > $path; } 2>&1); " +
+          "echo \"TWINCORE_WRITE rc=\$? path=$path err=\${o:-write-ok}\""
+
+  /** 不需要校验的辅助写入（如放宽 min 上限），仅尽力而为，静默失败即可。 */
+  private fun writePlain(path: String, value: String): String =
+      "echo '$value' > $path 2>/dev/null || true"
+
+  /**
+   * 从 write() 的输出行里抠出「rc + errno 文本」。
+   * 解析不到（旧固件 / shell 行为差异）时返回 null，不臆造原因。
+   */
+  private fun parseWriteResult(stdout: String, path: String): String? {
+    val line = stdout.lineSequence().firstOrNull { it.contains("TWINCORE_WRITE") && it.contains(path) }
+        ?: return null
+    val rc = Regex("rc=(\\d+)").find(line)?.groupValues?.get(1)?.toIntOrNull()
+    val err = Regex("err=(.*)$").find(line)?.groupValues?.get(1)?.trim().orEmpty()
+    val detail = if (err.isEmpty() || err == "write-ok") "" else "，底层：$err"
+    return "rc=${rc ?: "?"}$detail"
+  }
 
   /** "/sys/.../cpu6/cpufreq/scaling_min_freq" -> "cpu6_min_freq"，applied/failures 列表统一用这个名字。 */
   private fun opLabel(path: String): String {
@@ -851,6 +1062,7 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
       commands: List<String>,
       failures: List<String>,
       message: String,
+      rawErrors: List<String> = emptyList(),
   ): WritableMap {
     val big = if (policies.isEmpty()) null else biggest(policies)
     val smalls = if (big == null) emptyList() else policies.filter { it !== big }
@@ -888,6 +1100,12 @@ class TwinCorePerfModule(reactContext: ReactApplicationContext) :
           "failures",
           Arguments.createArray().apply {
             failures.forEach { pushString(it) }
+          },
+      )
+      putArray(
+          "rawErrors",
+          Arguments.createArray().apply {
+            rawErrors.forEach { pushString(it) }
           },
       )
       putString("message", message)
