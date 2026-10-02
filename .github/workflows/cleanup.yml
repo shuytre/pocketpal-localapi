@@ -1,6 +1,7 @@
 name: Cleanup CI history
 
-# 一次性/手动清理：删除所有失败的 workflow run + ci-logs 诊断 Release。
+# 一次性/手动清理：删除所有失败的 workflow run + 已删除旧 workflow 的遗留 run
+# （"Build Android APK (Cached)"，fork 上游残留）+ ci-logs 诊断 Release。
 # 触发方式：
 #   1. Actions 页手动 Run workflow（workflow_dispatch）
 #   2. push 到 main 且 commit message 含 [cleanup] 标记时自动执行
@@ -33,7 +34,7 @@ jobs:
           set -euo pipefail
           deleted=0
           for id in $(gh api --paginate "repos/$REPO/actions/runs?per_page=100" \
-              --jq '.workflow_runs[] | select(.conclusion=="failure" or .conclusion=="skipped") | .id'); do
+              --jq '.workflow_runs[] | select(.conclusion=="failure" or .conclusion=="skipped" or .name=="Build Android APK (Cached)") | .id'); do
             if gh api -X DELETE "repos/$REPO/actions/runs/$id" 2>/dev/null; then
               echo "deleted run $id"
               deleted=$((deleted+1))
@@ -67,7 +68,7 @@ jobs:
         run: |
           sleep 75
           for id in $(gh api --paginate "repos/$REPO/actions/runs?per_page=100" \
-              --jq '.workflow_runs[] | select(.conclusion=="failure" or .conclusion=="skipped") | .id'); do
+              --jq '.workflow_runs[] | select(.conclusion=="failure" or .conclusion=="skipped" or .name=="Build Android APK (Cached)") | .id'); do
             gh api -X DELETE "repos/$REPO/actions/runs/$id" 2>/dev/null \
               && echo "deleted run $id" || true
           done
