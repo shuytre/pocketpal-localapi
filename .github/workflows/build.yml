@@ -21,6 +21,8 @@ concurrency:
 
 jobs:
   build:
+    # [cleanup] 提交只做历史清理（见 cleanup.yml），不触发无意义的重复构建。
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[cleanup]')
     runs-on: ubuntu-latest
     timeout-minutes: 120
 

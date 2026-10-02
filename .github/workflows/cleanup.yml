@@ -1,0 +1,73 @@
+name: Cleanup CI history
+
+# 一次性/手动清理：删除所有失败的 workflow run + ci-logs 诊断 Release。
+# 触发方式：
+#   1. Actions 页手动 Run workflow（workflow_dispatch）
+#   2. push 到 main 且 commit message 含 [cleanup] 标记时自动执行
+# 普通 push 不会触发本 workflow（见下方 job 级 if）。
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: cleanup-ci-history
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[cleanup]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Delete failed workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          deleted=0
+          for id in $(gh api --paginate "repos/$REPO/actions/runs?per_page=100" \
+              --jq '.workflow_runs[] | select(.conclusion=="failure" or .conclusion=="skipped") | .id'); do
+            if gh api -X DELETE "repos/$REPO/actions/runs/$id" 2>/dev/null; then
+              echo "deleted run $id"
+              deleted=$((deleted+1))
+            else
+              echo "skip run $id (in progress or already gone)"
+            fi
+          done
+          echo "total deleted: $deleted"
+
+      - name: Delete ci-logs release and tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          rid=$(gh api "repos/$REPO/releases/tags/ci-logs" --jq .id 2>/dev/null || true)
+          if [ -n "${rid:-}" ]; then
+            gh api -X DELETE "repos/$REPO/releases/$rid" && echo "deleted release ci-logs"
+          else
+            echo "no ci-logs release"
+          fi
+          gh api -X DELETE "repos/$REPO/git/refs/tags/ci-logs" 2>/dev/null \
+            && echo "deleted tag ci-logs" || echo "no tag ci-logs"
+
+      # 同一 push 还会触发 Build TwinCore APK，但它的 job 级 if 会把 [cleanup]
+      # 提交的 run 置为 skipped —— 这里延迟补扫，把这条 skipped 记录也删掉。
+      - name: Sweep skipped runs (race with same-push triggers)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          sleep 75
+          for id in $(gh api --paginate "repos/$REPO/actions/runs?per_page=100" \
+              --jq '.workflow_runs[] | select(.conclusion=="failure" or .conclusion=="skipped") | .id'); do
+            gh api -X DELETE "repos/$REPO/actions/runs/$id" 2>/dev/null \
+              && echo "deleted run $id" || true
+          done
