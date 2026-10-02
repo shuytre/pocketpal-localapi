@@ -31,6 +31,7 @@ import {
   DownloadOverlay,
   HubRunSheetHost,
   LiquidGlassTabBar,
+  ErrorBoundary,
 } from './src/components';
 import {MarkdownProvider} from './src/components/MarkdownView';
 import {SplashOverlay} from './src/components/SplashOverlay';
@@ -76,6 +77,15 @@ const MainTabs: React.FC = observer(() => {
   const currentL10n = l10n[uiStore.language];
   const styles = createStyles(theme);
 
+  // 每个 tab 用带名字的错误边界包住：任何一页渲染炸了，屏幕上会直接写明
+  // 是哪一页 + 完整堆栈，而不是一张看不出归属的红屏。
+  const screen = (label: string, Comp: React.ComponentType<any>) =>
+    gestureHandlerRootHOC(() => (
+      <ErrorBoundary label={label}>
+        <Comp />
+      </ErrorBoundary>
+    ));
+
   return (
     <Tab.Navigator
       tabBar={props => <LiquidGlassTabBar {...props} />}
@@ -95,12 +105,12 @@ const MainTabs: React.FC = observer(() => {
       {/* === primary tabs (shown in the glass bar) === */}
       <Tab.Screen
         name={ROUTES.CHAT}
-        component={gestureHandlerRootHOC(ChatScreen)}
+        component={screen('对话', ChatScreen)}
         options={{headerShown: false}}
       />
       <Tab.Screen
         name={ROUTES.MODELS}
-        component={gestureHandlerRootHOC(ModelsScreen)}
+        component={screen('模型', ModelsScreen)}
         options={{
           headerRight: () => <ModelsHeaderRight />,
           headerStyle: styles.headerWithoutDivider,
@@ -109,7 +119,7 @@ const MainTabs: React.FC = observer(() => {
       />
       <Tab.Screen
         name={ROUTES.LOCAL_API}
-        component={gestureHandlerRootHOC(LocalApiScreen)}
+        component={screen('Agent', LocalApiScreen)}
         options={{
           headerStyle: styles.headerWithoutDivider,
           title: currentL10n.screenTitles.localApi,
@@ -117,7 +127,7 @@ const MainTabs: React.FC = observer(() => {
       />
       <Tab.Screen
         name={ROUTES.PERFORMANCE}
-        component={gestureHandlerRootHOC(PerformanceScreen)}
+        component={screen('性能模式', PerformanceScreen)}
         options={{
           headerStyle: styles.headerWithoutDivider,
           title: currentL10n.screenTitles.performance,
@@ -125,7 +135,7 @@ const MainTabs: React.FC = observer(() => {
       />
       <Tab.Screen
         name={ROUTES.SETTINGS}
-        component={gestureHandlerRootHOC(SettingsScreen)}
+        component={screen('设置', SettingsScreen)}
         options={{
           headerStyle: styles.headerWithoutDivider,
           title: currentL10n.screenTitles.settings,
@@ -135,7 +145,7 @@ const MainTabs: React.FC = observer(() => {
       {/* === secondary destinations (registered, not shown in the bar) === */}
       <Tab.Screen
         name={ROUTES.PALS}
-        component={gestureHandlerRootHOC(PalsScreen)}
+        component={screen('Pals', PalsScreen)}
         options={{
           headerRight: () => <PalHeaderRight />,
           headerStyle: styles.headerWithoutDivider,
@@ -144,7 +154,7 @@ const MainTabs: React.FC = observer(() => {
       />
       <Tab.Screen
         name={ROUTES.BENCHMARK}
-        component={gestureHandlerRootHOC(BenchmarkScreen)}
+        component={screen('基准测试', BenchmarkScreen)}
         options={{
           headerStyle: styles.headerWithoutDivider,
           title: currentL10n.screenTitles.benchmark,
@@ -152,7 +162,7 @@ const MainTabs: React.FC = observer(() => {
       />
       <Tab.Screen
         name={ROUTES.APP_INFO}
-        component={gestureHandlerRootHOC(AboutScreen)}
+        component={screen('关于', AboutScreen)}
         options={{
           headerStyle: styles.headerWithoutDivider,
           title: currentL10n.screenTitles.appInfo,
@@ -161,7 +171,7 @@ const MainTabs: React.FC = observer(() => {
       {isDebugMode && (
         <Tab.Screen
           name={ROUTES.DEV_TOOLS}
-          component={gestureHandlerRootHOC(DevToolsScreen)}
+          component={screen('开发者工具', DevToolsScreen)}
           options={{
             headerStyle: styles.headerWithoutDivider,
             title: 'Dev Tools',

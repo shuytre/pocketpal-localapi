@@ -52,6 +52,7 @@ export * from './Selector';
 export * from './SendButton';
 export * from './LiquidGlassTabBar';
 export * from './LiquidGlass';
+export * from './ErrorBoundary';
 export * from './Sheet';
 export * from './SkillsDisplay';
 export * from './StopButton';
