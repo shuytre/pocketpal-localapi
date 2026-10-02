@@ -69,7 +69,7 @@ export const createTagsStyles = (theme: Theme) => ({
   },
 });
 
-export const createStyles = (theme: Theme) =>
+export const createStyles = (_theme: Theme) =>
   StyleSheet.create({
     container: {
       flex: 1,

@@ -18,7 +18,11 @@ import {
   type LocalApiServerConfig,
 } from '../services/localApi/localApiBridge';
 import {setModelResident} from '../services/localApi/residencyGuard';
-import type {ApiRequestEvent, CallRecord, CallStats} from '../services/localApi/types';
+import type {
+  ApiRequestEvent,
+  CallRecord,
+  CallStats,
+} from '../services/localApi/types';
 import {summarizeCalls} from '../services/localApi/localApiBridge';
 
 /** 默认值集中在这里；UI 与推荐 profile 都以它为基准改。 */
@@ -422,7 +426,11 @@ class LocalApiStore {
           data.hasContext,
           data.modelName || 'unknown',
         );
-        await this.syncMemoryLock(data.hasContext, data.modelId, data.modelName);
+        await this.syncMemoryLock(
+          data.hasContext,
+          data.modelId,
+          data.modelName,
+        );
       },
       {fireImmediately: true},
     );

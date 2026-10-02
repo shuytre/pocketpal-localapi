@@ -277,6 +277,18 @@
     "batteryUnrestrictedHowTo": "点下方按钮进入本应用的系统设置，选择「省电策略」→「无限制」。",
     "batteryUnrestrictedOpen": "打开省电策略设置",
     "batteryUnrestrictedOpenFailed": "无法打开系统设置，请手动进入 设置 → 应用 → TwinCore → 省电策略。",
+    "smartModeTitle": "智能模式",
+    "smartModeSwitch": "智能模式（结束后台应用）",
+    "smartModeDescription": "结束后台运行的其他应用，把 CPU 与内存让给本地推理。",
+    "smartModeWarning": "警告：这会终止其他后台应用，未保存的内容可能丢失。需要 Shizuku 授权；系统进程和 Shizuku 本身绝不会被结束。",
+    "smartModeNeedsAuth": "请先授予 Shizuku 权限 —— 没有授权时智能模式不会生效。",
+    "smartModeKilling": "正在结束后台应用…",
+    "smartModeDone": "完成，最多结束了 {{count}} 个后台应用。",
+    "smartModePartial": "已完成，但有提示：{{message}}",
+    "smartModeFailed": "失败：{{message}}",
+    "localApiTitle": "局域网 API 服务",
+    "localApiDescription": "把已加载的 GGUF 模型通过标准 OpenAI 接口暴露到局域网。",
+    "localApiOpen": "打开"
   },
   "memory": {
     "shortWarning": "内存警告",
@@ -1252,7 +1264,8 @@
     "settings": "设置",
     "appInfo": "关于",
     "testCompletion": "测试完成",
-    "localApi": "局域网 API"
+    "localApi": "局域网 API",
+    "performance": "性能模式"
   },
   "localApi": {
     "safetyNotice": "本功能仅用于学术研究，禁止用于非法用途。",

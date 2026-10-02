@@ -44,15 +44,60 @@ const ADAPTIVE_SCALE = 108 / 48;
  * - `assets` entries land in assets/png/ for READMEs, store listings, etc.
  */
 const JOBS = [
-  {svg: 'ic_launcher_foreground.svg', kind: 'mipmap', name: 'ic_launcher_foreground.png', adaptive: true},
-  {svg: 'ic_launcher_background.svg', kind: 'mipmap', name: 'ic_launcher_background.png', adaptive: true},
-  {svg: 'ic_launcher.svg', kind: 'mipmap', name: 'ic_launcher.png', adaptive: false},
-  {svg: 'ic_launcher_round.svg', kind: 'mipmap', name: 'ic_launcher_round.png', adaptive: false},
-  {svg: 'logo-mark.svg', kind: 'assets', name: 'logo-mark.png', adaptive: false},
-  {svg: 'logo-primary.svg', kind: 'assets', name: 'logo-primary.png', adaptive: false},
-  {svg: 'logo-wordmark.svg', kind: 'assets', name: 'logo-wordmark.png', adaptive: false},
-  {svg: 'logo_monochrome.svg', kind: 'assets', name: 'logo-monochrome.png', adaptive: false},
-  {svg: 'splash_logo.svg', kind: 'assets', name: 'splash-logo.png', adaptive: false},
+  {
+    svg: 'ic_launcher_foreground.svg',
+    kind: 'mipmap',
+    name: 'ic_launcher_foreground.png',
+    adaptive: true,
+  },
+  {
+    svg: 'ic_launcher_background.svg',
+    kind: 'mipmap',
+    name: 'ic_launcher_background.png',
+    adaptive: true,
+  },
+  {
+    svg: 'ic_launcher.svg',
+    kind: 'mipmap',
+    name: 'ic_launcher.png',
+    adaptive: false,
+  },
+  {
+    svg: 'ic_launcher_round.svg',
+    kind: 'mipmap',
+    name: 'ic_launcher_round.png',
+    adaptive: false,
+  },
+  {
+    svg: 'logo-mark.svg',
+    kind: 'assets',
+    name: 'logo-mark.png',
+    adaptive: false,
+  },
+  {
+    svg: 'logo-primary.svg',
+    kind: 'assets',
+    name: 'logo-primary.png',
+    adaptive: false,
+  },
+  {
+    svg: 'logo-wordmark.svg',
+    kind: 'assets',
+    name: 'logo-wordmark.png',
+    adaptive: false,
+  },
+  {
+    svg: 'logo_monochrome.svg',
+    kind: 'assets',
+    name: 'logo-monochrome.png',
+    adaptive: false,
+  },
+  {
+    svg: 'splash_logo.svg',
+    kind: 'assets',
+    name: 'splash-logo.png',
+    adaptive: false,
+  },
 ];
 
 async function main() {
@@ -64,7 +109,7 @@ async function main() {
     console.error(
       '[export-svg] sharp is not installed. Run:\n' +
         '  yarn add -D sharp\n' +
-        'then re-run this script.'
+        'then re-run this script.',
     );
     process.exit(2);
   }
@@ -86,7 +131,7 @@ async function main() {
     const fg = path.join(SVG_DIR, 'ic_launcher_foreground.svg');
     const fgBuf = await sharp(fg).resize(108, 108).png().toBuffer();
     const mask = Buffer.from(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108"><rect x="0" y="0" width="108" height="108" rx="20" ry="20" fill="#fff"/></svg>`
+      `<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108"><rect x="0" y="0" width="108" height="108" rx="20" ry="20" fill="#fff"/></svg>`,
     );
     const base = await sharp(bg)
       .resize(108, 108)

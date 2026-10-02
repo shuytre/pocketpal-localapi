@@ -43,6 +43,7 @@ import {
 import ImageView from './ImageView';
 import {BannerRow} from './BannerRow';
 import {createStyles} from './styles';
+import {useLiquidTabBarSpace} from '../LiquidGlassTabBar/LiquidGlassTabBar';
 
 import {IncreaseContextSheet} from '../IncreaseContextSheet';
 import {
@@ -351,6 +352,9 @@ export const ChatView = observer(
     const {onLayout, size} = useComponentSize();
     const {onLayout: onLayoutChatInput, size: chatInputHeight} =
       useComponentSize();
+
+    // Live clearance for the floating glass tab bar (bar + safe-area inset).
+    const tabBarSpace = useLiquidTabBarSpace();
 
     const bottomComponentHeight = React.useMemo(() => {
       const height = chatInputHeight.height;
@@ -1000,7 +1004,10 @@ export const ChatView = observer(
               ListHeaderComponent={renderListHeaderComponent}
               maxToRenderPerBatch={6}
               onEndReachedThreshold={0.75}
-              style={[styles.flatList, {marginBottom: bottomComponentHeight}]}
+              style={[
+                styles.flatList,
+                {marginBottom: bottomComponentHeight + tabBarSpace},
+              ]}
               showsVerticalScrollIndicator={false}
               onScroll={handleScroll}
               {...unwrap(flatListProps)}
@@ -1065,6 +1072,7 @@ export const ChatView = observer(
         renderListFooterComponent,
         renderListHeaderComponent,
         bottomComponentHeight,
+        tabBarSpace,
         handleScroll,
         flatListProps,
         keyExtractor,
@@ -1122,7 +1130,12 @@ export const ChatView = observer(
     return (
       <UserContext.Provider value={user}>
         <View
-          style={[styles.container, {backgroundColor: inputBackgroundColor}]}
+          /* No background fill: the chat canvas must reach the screen edge so
+             the floating glass bar has real content behind it to blur/tinge.
+             An opaque shim here was what produced the "grey strip under the
+             nav bar" effect. Pal-tinted surfaces are drawn by their own
+             components (bubbles, input glass) instead. */
+          style={styles.container}
           onLayout={onLayout}>
           {/* Header */}
           <View style={styles.headerWrapper}>
@@ -1134,13 +1147,17 @@ export const ChatView = observer(
             {customContent}
             {renderChatList()}
 
-            {/* Chat input */}
+            {/* Chat input. The container is lifted by the tab bar's live
+                footprint so the glass bar floats in the gap underneath it
+                instead of covering it. No background colour is applied here:
+                ChatInput renders its own glass panel, and an opaque parent
+                fill would show as a hard-edged band around the panel. */}
             <Reanimated.View
               onLayout={onLayoutChatInput}
               style={[
                 styles.inputContainer,
+                {bottom: tabBarSpace},
                 inputContainerAnimatedStyle,
-                {backgroundColor: inputBackgroundColor},
               ]}>
               <BannerRow
                 messages={messages}
@@ -1297,6 +1314,17 @@ export const ChatView = observer(
             testID="pal-load-hint-snackbar">
             {l10n.chat.palLoadHint}
           </Snackbar>
+
+          {/* Bottom spacer clearing the floating liquid-glass tab bar.
+              Deliberately *below* the absolutely-positioned input container so
+              the bar and the input never overlap; the input's own
+              `paddingBottom` (see styles.inputContainer) provides the rest of
+              the clearance for the glass panel itself. */}
+          <View
+            pointerEvents="none"
+            style={{height: tabBarSpace}}
+            testID="liquid-tab-bar-spacer"
+          />
         </View>
       </UserContext.Provider>
     );

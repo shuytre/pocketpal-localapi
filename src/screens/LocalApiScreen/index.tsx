@@ -5,7 +5,14 @@ import {useNavigation} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Clipboard from '@react-native-clipboard/clipboard';
-import {Button, Card, Divider, Snackbar, Switch, Text} from 'react-native-paper';
+import {
+  Button,
+  Card,
+  Divider,
+  Snackbar,
+  Switch,
+  Text,
+} from 'react-native-paper';
 
 import {L10nContext} from '../../utils';
 import {useTheme} from '../../hooks';
@@ -100,14 +107,15 @@ export const LocalApiScreen: React.FC = observer(() => {
   // 轮询状态：端口 / 连接数 / 等待数必须实时 —— 排查「为什么一直 503」时，
   // 这几个数字比任何日志都直接。
   useEffect(() => {
-    if (!localApiStore.serviceEnabled) {
-      return;
-    }
+    // 轮询与开关状态解耦：始终起一个定时器，refresh() 内部自己判断服务是否
+    // 启用。这样 `serviceEnabled` 不再是 effect 依赖 —— 它是 mobx observable，
+    // 写进依赖数组并不会让 effect 重跑（观察由 observer 组件负责），
+    // ESLint 的 exhaustive-deps 判定它是无效依赖。
     const timer = setInterval(() => {
       void localApiStore.refresh();
     }, POLL_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [localApiStore.serviceEnabled]);
+  }, []);
 
   const commitNumber = useCallback(
     (raw: string, fallback: number, apply: (value: number) => void) => {
@@ -245,9 +253,14 @@ export const LocalApiScreen: React.FC = observer(() => {
                 </Text>
                 <Text
                   variant="bodyMedium"
-                  style={[styles.valueText, modelReady ? undefined : styles.errorText]}>
+                  style={[
+                    styles.valueText,
+                    modelReady ? undefined : styles.errorText,
+                  ]}>
                   {modelStore.activeModel?.name ?? l10n.localApi.unknown} ·{' '}
-                  {modelReady ? l10n.localApi.modelReady : l10n.localApi.modelNotReady}
+                  {modelReady
+                    ? l10n.localApi.modelReady
+                    : l10n.localApi.modelNotReady}
                 </Text>
               </View>
             </View>
@@ -295,14 +308,18 @@ export const LocalApiScreen: React.FC = observer(() => {
                     ) : (
                       lanBaseUrls.map(url => (
                         <View key={url} style={styles.chipRow}>
-                          <Text style={[styles.mono, styles.urlText]} selectable>
+                          <Text
+                            style={[styles.mono, styles.urlText]}
+                            selectable>
                             {url}
                           </Text>
                           <Button
                             compact
                             onPress={() => void onCopy(url, url)}
                             testID={`copy-base-url-${url}`}>
-                            {copied === url ? l10n.localApi.copied : l10n.localApi.copy}
+                            {copied === url
+                              ? l10n.localApi.copied
+                              : l10n.localApi.copy}
                           </Button>
                         </View>
                       ))
@@ -328,7 +345,9 @@ export const LocalApiScreen: React.FC = observer(() => {
                           compact
                           onPress={() => void onCopy(url, url)}
                           testID={`copy-base-url-${url}`}>
-                          {copied === url ? l10n.localApi.copied : l10n.localApi.copy}
+                          {copied === url
+                            ? l10n.localApi.copied
+                            : l10n.localApi.copy}
                         </Button>
                       </View>
                     ))
@@ -382,10 +401,16 @@ export const LocalApiScreen: React.FC = observer(() => {
                     compact
                     disabled={!localApiStore.apiKey}
                     onPress={() =>
-                      void onCopy(localApiStore.apiKey, 'api-key', l10n.localApi.copied)
+                      void onCopy(
+                        localApiStore.apiKey,
+                        'api-key',
+                        l10n.localApi.copied,
+                      )
                     }
                     testID="copy-api-key">
-                    {copied === 'api-key' ? l10n.localApi.copied : l10n.localApi.copy}
+                    {copied === 'api-key'
+                      ? l10n.localApi.copied
+                      : l10n.localApi.copy}
                   </Button>
                 </View>
                 <Text variant="labelSmall" style={styles.description}>
@@ -730,10 +755,17 @@ export const LocalApiScreen: React.FC = observer(() => {
                       value={maxWaitingDraft}
                       onChangeText={setMaxWaitingDraft}
                       onEndEditing={() =>
-                        commitNumber(maxWaitingDraft, localApiStore.maxWaiting, value => {
-                          localApiStore.maxWaiting = Math.min(Math.max(value, 0), 64);
-                          void localApiStore.applyRuntimeConfig();
-                        })
+                        commitNumber(
+                          maxWaitingDraft,
+                          localApiStore.maxWaiting,
+                          value => {
+                            localApiStore.maxWaiting = Math.min(
+                              Math.max(value, 0),
+                              64,
+                            );
+                            void localApiStore.applyRuntimeConfig();
+                          },
+                        )
                       }
                     />
                   </View>
@@ -814,12 +846,13 @@ export const LocalApiScreen: React.FC = observer(() => {
                     report.topology?.singleCluster
                       ? l10n.localApi.uniformCluster
                       : `${t(l10n.localApi.clusterSummary, {
-                          big: String(report.topology?.bigClusterCpus?.length ?? 0),
+                          big: String(
+                            report.topology?.bigClusterCpus?.length ?? 0,
+                          ),
                           small: String(report.topology?.smallCoreCount ?? 0),
                           total: String(report.topology?.totalCores ?? 0),
                         })} · ${
-                          report.topology?.hardware ||
-                          l10n.localApi.unknown
+                          report.topology?.hardware || l10n.localApi.unknown
                         }`
                   }
                   styles={styles}
@@ -900,7 +933,10 @@ export const LocalApiScreen: React.FC = observer(() => {
                       {l10n.localApi.notes}
                     </Text>
                     {report.notes.map(note => (
-                      <Text key={note} variant="labelSmall" style={styles.description}>
+                      <Text
+                        key={note}
+                        variant="labelSmall"
+                        style={styles.description}>
                         · {note}
                       </Text>
                     ))}
@@ -913,7 +949,10 @@ export const LocalApiScreen: React.FC = observer(() => {
                       {l10n.localApi.errors}
                     </Text>
                     {report.errors.map(error => (
-                      <Text key={error} variant="labelSmall" style={styles.errorText}>
+                      <Text
+                        key={error}
+                        variant="labelSmall"
+                        style={styles.errorText}>
                         · {error}
                       </Text>
                     ))}
@@ -931,7 +970,10 @@ export const LocalApiScreen: React.FC = observer(() => {
                     {showThreads && (
                       <ScrollView style={styles.threadBox} nestedScrollEnabled>
                         {report.threads.slice(0, 60).map(thread => (
-                          <Text key={thread} variant="labelSmall" style={styles.description}>
+                          <Text
+                            key={thread}
+                            variant="labelSmall"
+                            style={styles.description}>
                             {thread}
                           </Text>
                         ))}
@@ -954,7 +996,11 @@ export const LocalApiScreen: React.FC = observer(() => {
               radius={RADIUS.sm}
               contentStyle={styles.statGlassContent}>
               <View style={styles.statGrid}>
-                <Stat label={l10n.localApi.statsTotal} value={String(stats.total)} styles={styles} />
+                <Stat
+                  label={l10n.localApi.statsTotal}
+                  value={String(stats.total)}
+                  styles={styles}
+                />
                 <Stat
                   label={l10n.localApi.statsStreaming}
                   value={String(stats.streaming)}
@@ -1010,15 +1056,23 @@ export const LocalApiScreen: React.FC = observer(() => {
               </Text>
             ) : (
               localApiStore.callRecords.slice(0, 40).map(record => (
-                <View key={record.id} style={styles.logRow} testID={`call-row-${record.id}`}>
+                <View
+                  key={record.id}
+                  style={styles.logRow}
+                  testID={`call-row-${record.id}`}>
                   <Text
                     variant="bodySmall"
-                    style={record.status >= 400 ? styles.errorText : styles.valueText}>
+                    style={
+                      record.status >= 400 ? styles.errorText : styles.valueText
+                    }>
                     {`[${record.status}] ${formatTime(record.startedAt)} · ${record.durationMs}ms · ${
                       record.stream ? 'stream' : 'block'
                     } · ${record.remoteIp}`}
                   </Text>
-                  <Text variant="labelSmall" style={styles.description} numberOfLines={2}>
+                  <Text
+                    variant="labelSmall"
+                    style={styles.description}
+                    numberOfLines={2}>
                     {record.preview || '(no preview)'}
                   </Text>
                   <Text variant="labelSmall" style={styles.logMeta}>
@@ -1040,8 +1094,6 @@ export const LocalApiScreen: React.FC = observer(() => {
             {l10n.localApi.refresh}
           </Button>
         )}
-
-
       </ScrollView>
 
       <Snackbar

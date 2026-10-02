@@ -149,7 +149,9 @@ export const PerformanceChecklist: React.FC = () => {
       }
       setShizuku(res.value);
       if (!res.value.granted) {
-        setNote(res.value.message || l10n.settings.performanceModeNotAuthorized);
+        setNote(
+          res.value.message || l10n.settings.performanceModeNotAuthorized,
+        );
       }
     } finally {
       setBusy(false);
@@ -184,10 +186,16 @@ export const PerformanceChecklist: React.FC = () => {
     const url = `package:${APP_PACKAGE}`;
     try {
       const can = await Linking.canOpenURL(url);
-      await Linking.openURL(can ? url : `android.settings.APPLICATION_DETAILS_SETTINGS?package=${APP_PACKAGE}`);
+      await Linking.openURL(
+        can
+          ? url
+          : `android.settings.APPLICATION_DETAILS_SETTINGS?package=${APP_PACKAGE}`,
+      );
     } catch {
       try {
-        await Linking.openURL(`android.settings.APPLICATION_DETAILS_SETTINGS?package=${APP_PACKAGE}`);
+        await Linking.openURL(
+          `android.settings.APPLICATION_DETAILS_SETTINGS?package=${APP_PACKAGE}`,
+        );
       } catch {
         setNote(l10n.settings.performanceChecklistBatteryOpenFailed);
         return;
@@ -270,7 +278,9 @@ export const PerformanceChecklist: React.FC = () => {
       <Card.Content>
         {/* 完成横幅 */}
         {allDone ? (
-          <View style={styles.checklistBanner} testID="performance-activated-banner">
+          <View
+            style={styles.checklistBanner}
+            testID="performance-activated-banner">
             <Zap size={20} color={BRAND_COLORS.ok} />
             <Text
               variant="titleMedium"

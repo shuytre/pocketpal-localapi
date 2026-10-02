@@ -29,7 +29,9 @@ const getEmitter = (): NativeEventEmitter | null => {
   }
   if (emitter === null) {
     const moduleRef = NativeModules?.LocalApiServer;
-    emitter = moduleRef ? new NativeEventEmitter(moduleRef) : new NativeEventEmitter();
+    emitter = moduleRef
+      ? new NativeEventEmitter(moduleRef)
+      : new NativeEventEmitter();
   }
   return emitter;
 };
@@ -122,7 +124,9 @@ class LocalApiBridge {
     sink?.onRequestEnd(record);
   }
 
-  async start(config: LocalApiServerConfig): Promise<LocalApiServerStatus | null> {
+  async start(
+    config: LocalApiServerConfig,
+  ): Promise<LocalApiServerStatus | null> {
     if (!NativeLocalApiServer) {
       return null;
     }
@@ -197,16 +201,26 @@ function extractPreview(body: string): string {
 export const summarizeCalls = (records: CallRecord[]): CallStats => {
   const completed = records.filter(record => record.durationMs > 0);
   const failed = records.filter(record => record.status >= 400);
-  const totalDuration = records.reduce((sum, record) => sum + record.durationMs, 0);
+  const totalDuration = records.reduce(
+    (sum, record) => sum + record.durationMs,
+    0,
+  );
   return {
     total: records.length,
     streaming: records.filter(record => record.stream).length,
     failed: failed.length,
-    completionTokens: records.reduce((sum, record) => sum + record.completionTokens, 0),
+    completionTokens: records.reduce(
+      (sum, record) => sum + record.completionTokens,
+      0,
+    ),
     promptTokens: records.reduce((sum, record) => sum + record.promptTokens, 0),
-    droppedTokens: records.reduce((sum, record) => sum + record.droppedTokens, 0),
+    droppedTokens: records.reduce(
+      (sum, record) => sum + record.droppedTokens,
+      0,
+    ),
     rejectedByServer: records.filter(record => record.status === 503).length,
-    averageDurationMs: completed.length > 0 ? Math.round(totalDuration / completed.length) : 0,
+    averageDurationMs:
+      completed.length > 0 ? Math.round(totalDuration / completed.length) : 0,
     lastCallAt: records.length > 0 ? records[0].endedAt : undefined,
   };
 };

@@ -201,13 +201,11 @@ async function logTwinCoreThroughput(ctx: LlamaContext): Promise<void> {
     return;
   }
   try {
-    const bench = (ctx as unknown as {
-      bench?: (
-        pp: number,
-        tg: number,
-        pl: number,
-      ) => Promise<BenchResult>;
-    }).bench;
+    const bench = (
+      ctx as unknown as {
+        bench?: (pp: number, tg: number, pl: number) => Promise<BenchResult>;
+      }
+    ).bench;
     if (!bench) {
       return;
     }

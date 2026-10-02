@@ -50,8 +50,7 @@ const MEM_RESIDENT_THRESHOLD_MB = 6 * 1024;
 async function readSocLabel(fallback: string): Promise<string> {
   try {
     const cpuInfo = await NativeHardwareInfo?.getCPUInfo();
-    const candidate =
-      cpuInfo?.socModel || cpuInfo?.hardware || fallback || '';
+    const candidate = cpuInfo?.socModel || cpuInfo?.hardware || fallback || '';
     return candidate.trim();
   } catch {
     return fallback;
@@ -81,10 +80,7 @@ export async function detectDeviceProfile(): Promise<DeviceProfile> {
       confidence: 'low',
       presetId: 'unknown',
       // 识别失败明确降级，绝不静默：绑定未知核比不绑更糟。
-      reasons: [
-        ...reasons,
-        '未能识别机型，按通用配置应用（不做大核绑定）',
-      ],
+      reasons: [...reasons, '未能识别机型，按通用配置应用（不做大核绑定）'],
     };
   }
 
@@ -95,8 +91,13 @@ export async function detectDeviceProfile(): Promise<DeviceProfile> {
 
   const isUniform = topology.singleCluster;
   const isTwoPlusSix =
-    !isUniform && totalCores === 8 && bigCoreCount === 2 && topology.smallCoreCount === 6;
-  const socMatchesK20 = K20_SOC_PATTERNS.some(pattern => pattern.test(socLabel));
+    !isUniform &&
+    totalCores === 8 &&
+    bigCoreCount === 2 &&
+    topology.smallCoreCount === 6;
+  const socMatchesK20 = K20_SOC_PATTERNS.some(pattern =>
+    pattern.test(socLabel),
+  );
 
   if (isUniform) {
     reasons.push(
@@ -124,7 +125,9 @@ export async function detectDeviceProfile(): Promise<DeviceProfile> {
     );
     reasons.push('强制使用 2 个大核，线程数与之对齐');
     return {
-      label: socMatchesK20 ? `红米 K20 系列（${socLabel}）` : `${bigCoreCount} 大 + ${topology.smallCoreCount} 小`,
+      label: socMatchesK20
+        ? `红米 K20 系列（${socLabel}）`
+        : `${bigCoreCount} 大 + ${topology.smallCoreCount} 小`,
       topology,
       totalCores,
       bigCoreCount,
@@ -168,7 +171,8 @@ export function recommendParams(profile: DeviceProfile): RecommendedParams {
     niceTarget: -20,
   };
 
-  const memOk = profile.memTotalMb === 0 || profile.memTotalMb >= MEM_RESIDENT_THRESHOLD_MB;
+  const memOk =
+    profile.memTotalMb === 0 || profile.memTotalMb >= MEM_RESIDENT_THRESHOLD_MB;
   const residencyReason = memOk
     ? `内存 ${profile.memTotalMb}MB ≥ 6GB → 开启模型常驻`
     : `内存 ${profile.memTotalMb}MB < 6GB → 保守起见不开启模型常驻`;

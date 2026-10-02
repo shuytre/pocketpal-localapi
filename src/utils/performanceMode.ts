@@ -48,7 +48,7 @@ export type TwinCorePerfOutcome<T> =
   | {kind: 'unsupported'; reason: string}
   | {kind: 'error'; reason: string};
 
-const unsupported = <T,>(reason: string): TwinCorePerfOutcome<T> => ({
+const unsupported = <T>(reason: string): TwinCorePerfOutcome<T> => ({
   kind: 'unsupported',
   reason,
 });
@@ -69,7 +69,9 @@ export async function loadPerformanceMode(): Promise<TwinCorePerfMode> {
   return DEFAULT_PERFORMANCE_MODE;
 }
 
-export async function savePerformanceMode(mode: TwinCorePerfMode): Promise<void> {
+export async function savePerformanceMode(
+  mode: TwinCorePerfMode,
+): Promise<void> {
   try {
     await AsyncStorage.setItem(STORAGE_KEY_MODE, mode);
   } catch (e) {
@@ -120,14 +122,19 @@ export async function requestShizukuPermission(): Promise<
     return unsupported('CPU 调频仅在 Android 上可用。');
   }
   try {
-    return {kind: 'ok', value: await NativeTwinCorePerf!.requestShizukuPermission()};
+    return {
+      kind: 'ok',
+      value: await NativeTwinCorePerf!.requestShizukuPermission(),
+    };
   } catch (e: any) {
     return {kind: 'error', reason: e?.message ?? String(e)};
   }
 }
 
 /** 拉起 Shizuku Manager。返回实际拉起的包名，空串=没找到。 */
-export async function openShizukuManager(): Promise<TwinCorePerfOutcome<string>> {
+export async function openShizukuManager(): Promise<
+  TwinCorePerfOutcome<string>
+> {
   if (!isPerformanceModeSupported()) {
     return unsupported('仅在 Android 上可用。');
   }
@@ -206,7 +213,10 @@ export async function killBackgroundProcesses(): Promise<
     return unsupported('智能模式仅在 Android 上可用。');
   }
   try {
-    return {kind: 'ok', value: await NativeTwinCorePerf!.killBackgroundProcesses()};
+    return {
+      kind: 'ok',
+      value: await NativeTwinCorePerf!.killBackgroundProcesses(),
+    };
   } catch (e: any) {
     return {kind: 'error', reason: e?.message ?? String(e)};
   }

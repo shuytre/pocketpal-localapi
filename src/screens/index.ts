@@ -4,6 +4,7 @@ export * from './ChatScreen';
 export * from './LocalApiScreen';
 export * from './ModelsScreen';
 export * from './PalsScreen';
+export * from './PerformanceScreen';
 export * from './SettingsScreen';
 
 // Dev tools screen. Only available in debug mode.

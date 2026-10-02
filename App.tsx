@@ -43,6 +43,7 @@ import {
   BenchmarkScreen,
   AboutScreen,
   LocalApiScreen,
+  PerformanceScreen,
 
   // Dev tools screen. Only available in debug mode.
   DevToolsScreen,
@@ -82,6 +83,14 @@ const MainTabs: React.FC = observer(() => {
         headerStyle: styles.headerWithoutDivider,
         headerTintColor: theme.colors.onBackground,
         headerTitleStyle: styles.headerTitle,
+        // Scenes stay full-bleed and transparent-backgrounded so the floating
+        // glass bar genuinely floats *over* content (that is what sells the
+        // material). Each screen is responsible for its own bottom clearance —
+        // `sceneStyle.paddingBottom` used to live here, but padding a scene
+        // that already sits on `theme.colors.background` just inserted a band
+        // of raw background under the bar, which read as "a grey strip with
+        // the bar sitting on top of it" rather than glass on glass.
+        sceneStyle: {backgroundColor: 'transparent'},
       }}>
       {/* === primary tabs (shown in the glass bar) === */}
       <Tab.Screen
@@ -104,6 +113,14 @@ const MainTabs: React.FC = observer(() => {
         options={{
           headerStyle: styles.headerWithoutDivider,
           title: currentL10n.screenTitles.localApi,
+        }}
+      />
+      <Tab.Screen
+        name={ROUTES.PERFORMANCE}
+        component={gestureHandlerRootHOC(PerformanceScreen)}
+        options={{
+          headerStyle: styles.headerWithoutDivider,
+          title: currentL10n.screenTitles.performance,
         }}
       />
       <Tab.Screen

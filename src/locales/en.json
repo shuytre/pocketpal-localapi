@@ -1345,7 +1345,8 @@
     "settings": "Settings",
     "appInfo": "App Info",
     "testCompletion": "Test Completion",
-    "localApi": "Local API"
+    "localApi": "Local API",
+    "performance": "Performance"
   },
   "chat": {
     "conversationReset": "Conversation reset!",

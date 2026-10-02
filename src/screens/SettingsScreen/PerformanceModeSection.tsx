@@ -1,4 +1,10 @@
-import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {AppState, Platform, Pressable, View} from 'react-native';
 import {Button, Card, Divider, Switch, Text} from 'react-native-paper';
 import {BatteryCharging, Gauge, Zap} from 'lucide-react-native';
@@ -51,7 +57,13 @@ const BRAND_COLORS = {
  *  - failed      applied 为空：全部写入被拒
  *  - needsAuth   选了档位但 Shizuku 未授权 —— 降级路径：只记住选择，不写内核
  */
-type ApplyState = 'idle' | 'applied' | 'partial' | 'failed' | 'needsAuth' | 'notApplied';
+type ApplyState =
+  | 'idle'
+  | 'applied'
+  | 'partial'
+  | 'failed'
+  | 'needsAuth'
+  | 'notApplied';
 
 /**
  * TwinCore 的 Shizuku 状态面板 + 三档性能模式（Android only）。
@@ -95,7 +107,9 @@ export const PerformanceModeSection: React.FC = () => {
 
   const granted = shizuku?.granted ?? false;
   const binderAlive = shizuku?.binderAlive ?? false;
-  const shizukuInstalled = Boolean(shizuku?.serviceInstalled || shizuku?.managerInstalled);
+  const shizukuInstalled = Boolean(
+    shizuku?.serviceInstalled || shizuku?.managerInstalled,
+  );
 
   const labelFor = useCallback(
     (m: TwinCorePerfMode): string =>
@@ -135,7 +149,13 @@ export const PerformanceModeSection: React.FC = () => {
       const hasFailures = (report.failures?.length ?? 0) > 0;
       const hasApplied = (report.applied?.length ?? 0) > 0;
       setApplyState(
-        hasFailures ? (hasApplied ? 'partial' : 'failed') : hasApplied ? 'applied' : 'idle',
+        hasFailures
+          ? hasApplied
+            ? 'partial'
+            : 'failed'
+          : hasApplied
+            ? 'applied'
+            : 'idle',
       );
 
       if (!quiet) {
@@ -152,7 +172,10 @@ export const PerformanceModeSection: React.FC = () => {
     }
     let canceled = false;
     (async () => {
-      const [saved, auto] = await Promise.all([loadPerformanceMode(), loadAutoReapply()]);
+      const [saved, auto] = await Promise.all([
+        loadPerformanceMode(),
+        loadAutoReapply(),
+      ]);
       if (canceled) {
         return;
       }
@@ -372,7 +395,6 @@ export const PerformanceModeSection: React.FC = () => {
         : applyState
       : applyState;
 
-  const showApplyButton = granted;
   const showProfileWarning = applyState === 'partial';
 
   return (
@@ -427,7 +449,11 @@ export const PerformanceModeSection: React.FC = () => {
             styles={styles}
             dotColor={applyDotColor}
             label={l10n.settings.performanceModeCurrentActive}
-            value={detected ? labelFor(detected) : l10n.settings.performanceModeNoProfileApplied}
+            value={
+              detected
+                ? labelFor(detected)
+                : l10n.settings.performanceModeNoProfileApplied
+            }
           />
 
           {topology && (
@@ -472,15 +498,14 @@ export const PerformanceModeSection: React.FC = () => {
                   testID={`performance-mode-${m}`}>
                   <Icon
                     size={22}
-                    color={
-                      selected
-                        ? BRAND_COLORS.ok
-                        : theme.colors.onSurface
-                    }
+                    color={selected ? BRAND_COLORS.ok : theme.colors.onSurface}
                     style={styles.modeCardIcon}
                   />
                   <Text
-                    style={[styles.modeCardLabel, selected && styles.modeCardLabelSelected]}>
+                    style={[
+                      styles.modeCardLabel,
+                      selected && styles.modeCardLabelSelected,
+                    ]}>
                     {labelFor(m)}
                   </Text>
                 </Pressable>
@@ -489,7 +514,9 @@ export const PerformanceModeSection: React.FC = () => {
           </View>
 
           <Text variant="labelSmall" style={styles.textDescription}>
-            {t(l10n.settings.performanceModeSelectedMode, {mode: labelFor(mode)})}{' '}
+            {t(l10n.settings.performanceModeSelectedMode, {
+              mode: labelFor(mode),
+            })}{' '}
             {applyStateLabel[effectiveApplyState]}
           </Text>
 
@@ -619,7 +646,9 @@ const StatusRow: React.FC<{
   <View style={styles.switchContainer}>
     <View style={styles.textContainer}>
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
-        {dotColor ? <View style={[styles.statusDot, {backgroundColor: dotColor}]} /> : null}
+        {dotColor ? (
+          <View style={[styles.statusDot, {backgroundColor: dotColor}]} />
+        ) : null}
         <Text variant="titleMedium" style={styles.textLabel}>
           {label}
         </Text>

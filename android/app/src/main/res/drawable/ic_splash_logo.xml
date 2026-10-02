@@ -29,13 +29,13 @@
         <!-- Orbit ring (twin gaps left/right) -->
         <path
             android:pathData="M94.9,163 A186,186 0 0 1 417.1,163"
-            android:strokeColor="#3B82F6"
+            android:strokeColor="#00B283"
             android:strokeWidth="24"
             android:strokeLineCap="round"
             android:fillColor="#00000000"/>
         <path
             android:pathData="M417.1,349 A186,186 0 0 1 94.9,349"
-            android:strokeColor="#3B82F6"
+            android:strokeColor="#00B283"
             android:strokeWidth="24"
             android:strokeLineCap="round"
             android:fillColor="#00000000"/>
@@ -59,7 +59,7 @@
         <!-- Efficiency core (bottom) -->
         <path
             android:pathData="M204,292 L308,292 A28,28 0 0 1 336,320 L336,372 A28,28 0 0 1 308,400 L204,400 A28,28 0 0 1 176,372 L176,320 A28,28 0 0 1 204,292 Z"
-            android:fillColor="#3B82F6"/>
+            android:fillColor="#00B283"/>
         <path
             android:pathData="M212.5,332.5 L299.5,332.5"
             android:strokeColor="#800A0E1A"

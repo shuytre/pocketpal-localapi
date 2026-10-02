@@ -112,11 +112,20 @@ export async function executeChatCompletion(
     } catch {
       // ignore
     }
-    return {status, promptTokens: 0, completionTokens: 0, content: '', error: message};
+    return {
+      status,
+      promptTokens: 0,
+      completionTokens: 0,
+      content: '',
+      error: message,
+    };
   };
 
   if (!context || !activeModel) {
-    return failWith(503, 'Model is not loaded. Load a model in PocketPal first.');
+    return failWith(
+      503,
+      'Model is not loaded. Load a model in PocketPal first.',
+    );
   }
 
   let body: ChatCompletionBody;
@@ -140,7 +149,10 @@ export async function executeChatCompletion(
   const modelStop =
     Array.isArray(stopWords) && stopWords.length > 0 ? stopWords : undefined;
   const nPredict =
-    body.max_tokens ?? body.n_predict ?? options.defaultMaxTokens ?? DEFAULT_MAX_TOKENS;
+    body.max_tokens ??
+    body.n_predict ??
+    options.defaultMaxTokens ??
+    DEFAULT_MAX_TOKENS;
 
   // 请求带的 stop 优先于模型自带的 stop words：客户端的意图更具体。
   const stop = normalizeStop(body.stop) ?? modelStop;
@@ -153,7 +165,8 @@ export async function executeChatCompletion(
       content: message.content,
     })),
     n_predict: nPredict,
-    temperature: body.temperature ?? options.defaultTemperature ?? DEFAULT_TEMPERATURE,
+    temperature:
+      body.temperature ?? options.defaultTemperature ?? DEFAULT_TEMPERATURE,
     ...(body.top_p !== undefined ? {top_p: body.top_p} : {}),
     ...(body.top_k !== undefined ? {top_k: body.top_k} : {}),
     ...(stop ? {stop} : {}),
@@ -186,7 +199,8 @@ export async function executeChatCompletion(
 
     const completionTokens =
       result?.tokens_predicted ?? result?.timings?.predicted_n ?? 0;
-    const promptTokens = result?.tokens_evaluated ?? result?.timings?.prompt_n ?? 0;
+    const promptTokens =
+      result?.tokens_evaluated ?? result?.timings?.prompt_n ?? 0;
 
     return await finishLater(
       200,

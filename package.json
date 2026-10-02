@@ -144,5 +144,8 @@
     "android": {
       "javaPackageName": "com.pocketpal.specs"
     }
+  },
+  "resolutions": {
+    "@react-navigation/elements": "2.9.44"
   }
 }

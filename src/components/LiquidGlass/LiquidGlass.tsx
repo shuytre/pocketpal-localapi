@@ -1,18 +1,8 @@
 import React from 'react';
-import {
-  StyleProp,
-  StyleSheet,
-  View,
-  ViewStyle,
-} from 'react-native';
+import {StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
-import {
-  GLASS,
-  GlassVariant,
-  RADIUS,
-  SHADOW,
-} from './tokens';
+import {GLASS, GlassVariant, RADIUS, SHADOW} from './tokens';
 
 export type LiquidGlassVariant = GlassVariant;
 
@@ -32,128 +22,90 @@ export type LiquidGlassProps = {
 };
 
 /**
- * Reusable "liquid glass" surface.
+ * Reusable "liquid glass" surface — cheap variant.
  *
- * A frosted-glass slab faked entirely with layered rgba gradients — no native
- * blur dependency. Structure, back to front:
+ * ## Why this is deliberately not fancy
  *
- *   1. Outer View       — radius + elevation + overflow clip
- *   2. Base gradient    — the tier's dark base fill
- *   3. Sheen gradient   — diagonal white highlight (light → transparent)
- *   4. Tint gradient    — brand-mint wash (accent tier only)
- *   5. Specular bar     — 1px bright rim along the top edge
- *   6. Inner border     — dim hairline border deepening the enclosure
- *   7. Content          — `children`, styled via `contentStyle`
+ * The first implementation stacked three `LinearGradient`s (base + sheen +
+ * tint) plus two absolutely-positioned rim `View`s *per instance*. With
+ * 15+ instances on a single screen (settings cards, model cards, chat input)
+ * and several of them inside a scrolling `FlatList`, the Redmi K20's Adreno
+ * 618 spent its whole frame budget compositing low-alpha layers that are
+ * visually almost identical to a single gradient. That is what produced the
+ * "everything janks and the open animation tears into layers" report.
  *
- * Pick a `variant` that matches the element's role so surfaces stay
- * visually distinct instead of every panel looking identical.
+ * The current structure is **three nodes total**, and only *one* of them is a
+ * gradient (two in the accent tier):
+ *
+ *   1. Outer  View — radius + shadow
+ *   2. Inner  LinearGradient — a single diagonal base + sheen ramp
+ *   3. Content View — `children`, styled via `contentStyle`
+ *
+ * What was dropped and why it costs nothing visually:
+ *   - the separate 1px specular rim — the gradient's bright top stop already
+ *     reads as the lit edge, and the rim was rendering sub-pixel on most
+ *     densities anyway;
+ *   - the separate 1px inner border — folded into the gradient ramp;
+ *   - the accent tint layer — folded into the accent tier's own stops.
+ *
+ * Hierarchy between the tiers is preserved: each variant has its own opacity
+ * and sheen strength, so cards, overlays and secondary containers still read
+ * as different materials instead of one uniform slab.
  */
-export const LiquidGlass: React.FC<LiquidGlassProps> = ({
-  variant = 'surface',
-  radius = RADIUS.md,
-  style,
-  contentStyle,
-  clip = true,
-  children,
-  testID,
-}) => {
-  const tier = GLASS[variant];
-  const shadow = SHADOW[tier.elevation];
+export const LiquidGlass: React.FC<LiquidGlassProps> = React.memo(
+  ({
+    variant = 'surface',
+    radius = RADIUS.md,
+    style,
+    contentStyle,
+    clip = true,
+    children,
+    testID,
+  }) => {
+    const tier = GLASS[variant];
+    const shadow = SHADOW[tier.elevation];
 
-  return (
-    <View
-      testID={testID}
-      style={[
-        shadow,
-        {borderRadius: radius},
-        style,
-      ]}>
-      <View
-        style={[
-          styles.clip,
-          {borderRadius: radius},
-          clip ? styles.hidden : null,
-        ]}>
-        {/* Base fill. */}
-        <LinearGradient
-          colors={[tier.base, tier.base]}
-          start={{x: 0, y: 0}}
-          end={{x: 0, y: 1}}
-          style={StyleSheet.absoluteFill}
-          pointerEvents="none"
-        />
-        {/* Diagonal sheen — the "frost". */}
-        <LinearGradient
-          colors={[tier.sheenTop, tier.sheenBottom]}
-          start={{x: 0, y: 0}}
-          end={{x: 1, y: 1}}
-          style={StyleSheet.absoluteFill}
-          pointerEvents="none"
-        />
-        {/* Accent tint (accent tier only). */}
-        {tier.tint ? (
-          <LinearGradient
-            colors={[tier.tint, 'rgba(0, 229, 160, 0.02)']}
-            start={{x: 0, y: 0}}
-            end={{x: 0, y: 1}}
-            style={StyleSheet.absoluteFill}
-            pointerEvents="none"
-          />
-        ) : null}
-
-        {/* Top specular rim — the bright edge that reads as glass. */}
+    return (
+      <View testID={testID} style={[shadow, {borderRadius: radius}, style]}>
         <View
           style={[
-            styles.specular,
+            {borderRadius: radius},
+            clip ? styles.hidden : null,
+            // Border is a real `borderColor` rather than a separate overlay
+            // View, so it darkens/lightens with the tier without extra nodes.
             {
-              left: radius / 2,
-              right: radius / 2,
-              backgroundColor: tier.specular,
-            },
-          ]}
-          pointerEvents="none"
-        />
-
-        {/* Dim inner border. */}
-        <View
-          style={[
-            styles.innerBorder,
-            {
-              borderRadius: radius,
+              borderWidth: StyleSheet.hairlineWidth,
               borderTopColor: tier.borderTop,
               borderBottomColor: tier.borderBottom,
+              borderLeftColor: tier.borderTop,
+              borderRightColor: tier.borderBottom,
+              overflow: 'hidden',
             },
-          ]}
-          pointerEvents="none"
-        />
-
-        <View style={contentStyle}>{children}</View>
+          ]}>
+          {/* Single gradient carrying the whole material: base fill, diagonal
+              sheen and (for accent) the brand tint, in one draw call. */}
+          <LinearGradient
+            colors={
+              tier.tint
+                ? [tier.tint, tier.base, tier.sheenBottom]
+                : [tier.sheenTop, tier.base, tier.sheenBottom]
+            }
+            locations={tier.tint ? [0, 0.45, 1] : [0, 0.5, 1]}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            pointerEvents="none"
+            style={StyleSheet.absoluteFill}
+          />
+          <View style={contentStyle}>{children}</View>
+        </View>
       </View>
-    </View>
-  );
-};
+    );
+  },
+);
 
 const styles = StyleSheet.create({
-  clip: {
-    // `overflow: hidden` is applied conditionally via `hidden`.
-  },
   hidden: {
     overflow: 'hidden',
-  },
-  specular: {
-    position: 'absolute',
-    top: 0,
-    height: StyleSheet.hairlineWidth * 2,
-    borderRadius: 2,
-  },
-  innerBorder: {
-    ...StyleSheet.absoluteFillObject,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderLeftWidth: StyleSheet.hairlineWidth,
-    borderRightWidth: StyleSheet.hairlineWidth,
-    borderLeftColor: 'rgba(255, 255, 255, 0.04)',
-    borderRightColor: 'rgba(255, 255, 255, 0.04)',
   },
 });
 

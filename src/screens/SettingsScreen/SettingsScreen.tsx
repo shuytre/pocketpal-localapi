@@ -6,7 +6,6 @@ import {
   Keyboard,
   ScrollView,
   TextInput as RNTextInput,
-  Alert,
   Linking,
   TouchableOpacity,
 } from 'react-native';
@@ -26,10 +25,7 @@ import {
   SegmentedButtons,
 } from 'react-native-paper';
 
-import {
-  GlobeIcon,
-  LinkExternalIcon,
-} from '../../assets/icons';
+import {GlobeIcon, LinkExternalIcon} from '../../assets/icons';
 
 import {
   TextInput,
@@ -45,12 +41,7 @@ import {useTheme} from '../../hooks';
 
 import {createStyles} from './styles';
 import {CacheTypeMenuRow, useMenuAnchor} from './CacheTypeMenuRow';
-import {PerformanceModeSection} from './PerformanceModeSection';
-import {SmartModeCard} from './SmartModeCard';
-import {PerformanceChecklist} from './PerformanceChecklist';
-import {BatteryOptimizationGuide} from './BatteryOptimizationGuide';
-
-import {modelStore, uiStore} from '../../store';
+import {modelStore} from '../../store';
 
 import {CacheType, ModelType} from '../../utils/types';
 import {L10nContext} from '../../utils';
@@ -350,12 +341,9 @@ export const SettingsScreen: React.FC = observer(() => {
             </Card.Content>
           </LiquidGlass>
 
-          {/* ② 性能模式设置：智能模式卡片 + 性能模式面板 + 分步引导清单 + 省电策略引导。
-              PerformanceModeSection / SmartModeCard 内部由并行任务维护，这里只做挂载。 */}
-          <SmartModeCard />
-          <PerformanceModeSection />
-          <PerformanceChecklist />
-          <BatteryOptimizationGuide />
+          {/* ② 性能模式已独立成底部导航的一个类别（见 PerformanceScreen），
+              设置页不再重复挂载。这样设置页只剩「语言 / 模型初始化 / 内存」
+              三块，与设计一致。 */}
 
           {/* Model Initialization Settings */}
           <LiquidGlass variant="surface" radius={RADIUS.md} style={styles.card}>
