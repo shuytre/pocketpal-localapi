@@ -39,6 +39,8 @@ import {
   InputSlider,
 } from '../../components';
 
+import {LiquidGlass, RADIUS} from '../../components/LiquidGlass';
+
 import {useTheme} from '../../hooks';
 
 import {createStyles} from './styles';
@@ -323,7 +325,7 @@ export const SettingsScreen: React.FC = observer(() => {
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled">
           {/* ① 语言 */}
-          <Card elevation={0} style={styles.card}>
+          <LiquidGlass variant="surface" radius={RADIUS.md} style={styles.card}>
             <Card.Title title={l10n.settings.appSettings} />
             <Card.Content>
               <View style={styles.settingItemContainer}>
@@ -346,7 +348,7 @@ export const SettingsScreen: React.FC = observer(() => {
                 </View>
               </View>
             </Card.Content>
-          </Card>
+          </LiquidGlass>
 
           {/* ② 性能模式设置：智能模式卡片 + 性能模式面板 + 分步引导清单 + 省电策略引导。
               PerformanceModeSection / SmartModeCard 内部由并行任务维护，这里只做挂载。 */}
@@ -356,7 +358,7 @@ export const SettingsScreen: React.FC = observer(() => {
           <BatteryOptimizationGuide />
 
           {/* Model Initialization Settings */}
-          <Card elevation={0} style={styles.card}>
+          <LiquidGlass variant="surface" radius={RADIUS.md} style={styles.card}>
             <Card.Title title={l10n.settings.modelInitializationSettings} />
             <Card.Content>
               {/* Device Selection */}
@@ -911,10 +913,10 @@ export const SettingsScreen: React.FC = observer(() => {
                 </View>
               </List.Accordion>
             </Card.Content>
-          </Card>
+          </LiquidGlass>
 
           {/* ④ Memory Settings */}
-          <Card elevation={0} style={styles.card}>
+          <LiquidGlass variant="surface" radius={RADIUS.md} style={styles.card}>
             <Card.Title title={l10n.settings.memorySettings} />
             <Card.Content>
               <View style={styles.settingItemContainer}>
@@ -992,7 +994,7 @@ export const SettingsScreen: React.FC = observer(() => {
                 {l10n.settings.modelReloadNotice}
               </Text>
             </Card.Content>
-          </Card>
+          </LiquidGlass>
         </ScrollView>
       </TouchableWithoutFeedback>
     </SafeAreaView>

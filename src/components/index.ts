@@ -53,6 +53,7 @@ export * from './SendButton';
 export * from './SessionDrawer';
 export * from './SidebarContent';
 export * from './LiquidGlassTabBar';
+export * from './LiquidGlass';
 export * from './Sheet';
 export * from './SkillsDisplay';
 export * from './StopButton';

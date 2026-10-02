@@ -13,7 +13,6 @@ import {observer} from 'mobx-react-lite';
 import {useNavigation} from '@react-navigation/native';
 import {DrawerNavigationProp} from '@react-navigation/drawer';
 import {
-  Card,
   Icon,
   ProgressBar,
   Button,
@@ -26,6 +25,8 @@ import {
 } from 'react-native-paper';
 
 import {ProjectionModelSelector, MemoryRequirement} from '../../../components';
+
+import {LiquidGlass, RADIUS} from '../../../components/LiquidGlass';
 
 import {useTheme, useMemoryCheck, useStorageCheck} from '../../../hooks';
 
@@ -685,7 +686,13 @@ export const ModelCard: React.FC<ModelCardProps> = observer(
 
     return (
       <>
-        <Card elevation={0} style={styles.card} testID={`model-card-${cardId}`}>
+        {/* 卡片外层容器玻璃化；内部的 technicalDetailCard / visionToggleContainer
+            等次级块仍用不透明 surface 底，保证文字对比度不退化。 */}
+        <LiquidGlass
+          variant="surface"
+          radius={RADIUS.lg}
+          style={styles.card}
+          testID={`model-card-${cardId}`}>
           {/* Compact Header */}
           <View style={styles.compactHeader}>
             <View style={styles.headerContent}>
@@ -1025,7 +1032,7 @@ export const ModelCard: React.FC<ModelCardProps> = observer(
               </View>
             )}
           </View>
-        </Card>
+        </LiquidGlass>
         {/* Snackbar to show full memory warning */}
         <Snackbar
           testID="memory-warning-snackbar"

@@ -5,6 +5,7 @@ import {BatteryFull} from 'lucide-react-native';
 
 import {useTheme} from '../../hooks';
 import {L10nContext} from '../../utils';
+import {LiquidGlass, RADIUS} from '../../components/LiquidGlass';
 
 import {createStyles} from './styles';
 
@@ -52,8 +53,9 @@ export const BatteryOptimizationGuide: React.FC = () => {
   }
 
   return (
-    <Card
-      elevation={0}
+    <LiquidGlass
+      variant="surface"
+      radius={RADIUS.md}
       style={styles.card}
       testID="battery-unrestricted-guide-card">
       <Card.Title title={l10n.settings.batteryUnrestrictedTitle} />
@@ -88,6 +90,6 @@ export const BatteryOptimizationGuide: React.FC = () => {
           ) : null}
         </View>
       </Card.Content>
-    </Card>
+    </LiquidGlass>
   );
 };

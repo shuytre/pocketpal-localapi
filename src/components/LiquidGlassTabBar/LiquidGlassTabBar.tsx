@@ -18,26 +18,28 @@ import {
 } from 'lucide-react-native';
 
 import {ROUTES} from '../../utils/navigationConstants';
+import {
+  ACTIVE_GLOW,
+  BRAND,
+  GLASS,
+  RADIUS,
+  SHADOW,
+  SPECULAR,
+} from '../LiquidGlass';
 
-// TwinCore brand palette. The glass sits on the dark app background, so the
-// tint is a low-alpha near-white over an almost-transparent dark base.
-const BRAND = {
-  background: '#0A0E1A',
-  primary: '#00E5A0',
-  inactive: 'rgba(233, 238, 248, 0.55)',
-  // Layered rgba highlights/shadows that fake a frosted-glass surface
-  // without pulling in a native blur dependency.
-  glassTop: 'rgba(255, 255, 255, 0.14)',
-  glassBottom: 'rgba(255, 255, 255, 0.04)',
-  glassBase: 'rgba(18, 24, 40, 0.72)',
-  borderTop: 'rgba(255, 255, 255, 0.22)',
-  borderBottom: 'rgba(255, 255, 255, 0.06)',
-  activePill: 'rgba(0, 229, 160, 0.16)',
-  activeGlow: 'rgba(0, 229, 160, 0.28)',
+// The bar's glass is the shared `surface` tier from the LiquidGlass tokens, so
+// the tab bar and the general-purpose glass component stay in sync. The tab
+// bar's own sheen is slightly brighter than the default surface (0.14 vs 0.12)
+// to keep its existing look, so we keep a local pair of strings for that.
+const BAR_SHEEN = {
+  top: 'rgba(255, 255, 255, 0.14)',
+  bottom: 'rgba(255, 255, 255, 0.04)',
 } as const;
 
+const SURFACE = GLASS.surface;
+
 const BAR_HEIGHT = 64;
-const BAR_RADIUS = 28;
+const BAR_RADIUS = RADIUS.lg;
 const BAR_MARGIN_H = 18;
 const BAR_MARGIN_BOTTOM = 14;
 const ICON_SIZE = 22;
@@ -100,7 +102,6 @@ const TabButton: React.FC<TabButtonProps> = ({
 
   const Icon = meta.icon;
   const tint = focused ? BRAND.primary : BRAND.inactive;
-
   return (
     <Pressable
       style={styles.tabButton}
@@ -151,13 +152,13 @@ export const LiquidGlassTabBar: React.FC<BottomTabBarProps> = ({
       pointerEvents="box-none">
       <View style={styles.shadow}>
         <LinearGradient
-          colors={[BRAND.glassBase, BRAND.glassBase]}
+          colors={[SURFACE.base, SURFACE.base]}
           start={{x: 0, y: 0}}
           end={{x: 0, y: 1}}
           style={[styles.glassBase, styles.borderOuter]}>
           {/* Frost layer: diagonal light-to-dark sheen on top of the base. */}
           <LinearGradient
-            colors={[BRAND.glassTop, BRAND.glassBottom]}
+            colors={[BAR_SHEEN.top, BAR_SHEEN.bottom]}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
             style={[StyleSheet.absoluteFill, styles.frost]}
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
   shadow: {
     borderRadius: BAR_RADIUS,
     // Elevation/shadow to lift the glass off the content behind it.
-    shadowColor: '#000000',
+    ...SHADOW.surface,
     shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.35,
     shadowRadius: 18,
@@ -231,7 +232,7 @@ const styles = StyleSheet.create({
   },
   borderOuter: {
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: BRAND.borderTop,
+    borderColor: SURFACE.borderTop,
   },
   frost: {
     borderRadius: BAR_RADIUS,
@@ -243,13 +244,13 @@ const styles = StyleSheet.create({
     right: BAR_RADIUS / 2,
     height: StyleSheet.hairlineWidth * 2,
     borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    backgroundColor: SPECULAR.color,
   },
   innerBorder: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: BAR_RADIUS,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: BRAND.borderBottom,
+    borderColor: SURFACE.borderBottom,
   },
   tabRow: {
     flexDirection: 'row',
@@ -274,9 +275,9 @@ const styles = StyleSheet.create({
     width: 40,
     height: 30,
     borderRadius: 15,
-    backgroundColor: BRAND.activePill,
+    backgroundColor: ACTIVE_GLOW.pill,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: BRAND.activeGlow,
+    borderColor: ACTIVE_GLOW.glow,
   },
   tabLabel: {
     marginTop: 2,

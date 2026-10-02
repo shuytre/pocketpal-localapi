@@ -12,6 +12,7 @@ import {useTheme} from '../../hooks';
 import {localApiStore} from '../../store/LocalApiStore';
 import {modelStore} from '../../store/ModelStore';
 import {TextInput} from '../../components';
+import {LiquidGlass, RADIUS} from '../../components/LiquidGlass';
 import {localApiSupported} from '../../services/localApi/localApiBridge';
 import {applyRecommendedToStore} from '../../services/perfTune/bootstrapPerformanceMode';
 import {
@@ -194,7 +195,7 @@ export const LocalApiScreen: React.FC = observer(() => {
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.container}>
         {/* ① 服务 */}
-        <Card elevation={0} style={styles.card}>
+        <LiquidGlass variant="surface" radius={RADIUS.md} style={styles.card}>
           <Card.Title title={l10n.localApi.serviceSection} />
           <Card.Content>
             <View style={styles.row}>
@@ -424,10 +425,10 @@ export const LocalApiScreen: React.FC = observer(() => {
               {l10n.localApi.safetyNotice}
             </Text>
           </Card.Content>
-        </Card>
+        </LiquidGlass>
 
         {/* ② 提升模型能力 */}
-        <Card elevation={0} style={styles.card}>
+        <LiquidGlass variant="surface" radius={RADIUS.md} style={styles.card}>
           <Card.Title
             title={l10n.localApi.performanceSection}
             right={() => (
@@ -789,10 +790,10 @@ export const LocalApiScreen: React.FC = observer(() => {
               </>
             )}
           </Card.Content>
-        </Card>
+        </LiquidGlass>
 
         {/* ③ 调优报告 */}
-        <Card elevation={0} style={styles.card}>
+        <LiquidGlass variant="surface" radius={RADIUS.md} style={styles.card}>
           <Card.Title title={l10n.localApi.reportSection} />
           <Card.Content>
             <Text variant="labelSmall" style={styles.description}>
@@ -941,40 +942,46 @@ export const LocalApiScreen: React.FC = observer(() => {
               </>
             )}
           </Card.Content>
-        </Card>
+        </LiquidGlass>
 
         {/* ④ 调用统计 */}
-        <Card elevation={0} style={styles.card}>
+        <LiquidGlass variant="surface" radius={RADIUS.md} style={styles.card}>
           <Card.Title title={l10n.localApi.statsSection} />
           <Card.Content>
-            <View style={styles.statGrid}>
-              <Stat label={l10n.localApi.statsTotal} value={String(stats.total)} styles={styles} />
-              <Stat
-                label={l10n.localApi.statsStreaming}
-                value={String(stats.streaming)}
-                styles={styles}
-              />
-              <Stat
-                label={l10n.localApi.statsFailed}
-                value={String(stats.failed)}
-                styles={styles}
-              />
-              <Stat
-                label={l10n.localApi.statsAvgDuration}
-                value={`${stats.averageDurationMs}ms`}
-                styles={styles}
-              />
-              <Stat
-                label={l10n.localApi.statsDropped}
-                value={String(localApiStore.droppedTokens)}
-                styles={styles}
-              />
-              <Stat
-                label={l10n.localApi.statsInFlight}
-                value={String(localApiStore.inFlight.length)}
-                styles={styles}
-              />
-            </View>
+            {/* 次级/内嵌容器：用 subtle 层，和 surface 主卡拉开层次。 */}
+            <LiquidGlass
+              variant="subtle"
+              radius={RADIUS.sm}
+              contentStyle={styles.statGlassContent}>
+              <View style={styles.statGrid}>
+                <Stat label={l10n.localApi.statsTotal} value={String(stats.total)} styles={styles} />
+                <Stat
+                  label={l10n.localApi.statsStreaming}
+                  value={String(stats.streaming)}
+                  styles={styles}
+                />
+                <Stat
+                  label={l10n.localApi.statsFailed}
+                  value={String(stats.failed)}
+                  styles={styles}
+                />
+                <Stat
+                  label={l10n.localApi.statsAvgDuration}
+                  value={`${stats.averageDurationMs}ms`}
+                  styles={styles}
+                />
+                <Stat
+                  label={l10n.localApi.statsDropped}
+                  value={String(localApiStore.droppedTokens)}
+                  styles={styles}
+                />
+                <Stat
+                  label={l10n.localApi.statsInFlight}
+                  value={String(localApiStore.inFlight.length)}
+                  styles={styles}
+                />
+              </View>
+            </LiquidGlass>
             <Text variant="labelSmall" style={styles.description}>
               {l10n.localApi.statsLastCall}: {formatTime(stats.lastCallAt)}
             </Text>
@@ -984,10 +991,10 @@ export const LocalApiScreen: React.FC = observer(() => {
               </Text>
             )}
           </Card.Content>
-        </Card>
+        </LiquidGlass>
 
         {/* ⑤ 调用明细 */}
-        <Card elevation={0} style={styles.card}>
+        <LiquidGlass variant="surface" radius={RADIUS.md} style={styles.card}>
           <Card.Title
             title={l10n.localApi.logSection}
             right={() => (
@@ -1023,7 +1030,7 @@ export const LocalApiScreen: React.FC = observer(() => {
               ))
             )}
           </Card.Content>
-        </Card>
+        </LiquidGlass>
 
         {Platform.OS === 'android' && (
           <Button

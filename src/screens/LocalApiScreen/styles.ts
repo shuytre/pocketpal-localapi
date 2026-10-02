@@ -12,10 +12,11 @@ export const createStyles = (theme: Theme) =>
       padding: 16,
       paddingBottom: 48,
     },
+    // 外层分组容器背景改由 <LiquidGlass variant="surface"> 提供，
+    // 这里只留间距，避免不透明底覆盖玻璃。
     card: {
       marginVertical: 8,
-      borderRadius: 12,
-      backgroundColor: theme.colors.background,
+      backgroundColor: 'transparent',
     },
     row: {
       flexDirection: 'row',
@@ -70,6 +71,11 @@ export const createStyles = (theme: Theme) =>
       flexDirection: 'row',
       flexWrap: 'wrap',
       marginTop: 8,
+    },
+    // subtle 玻璃内嵌容器的内边距，替代原 statGrid 的直接贴边。
+    statGlassContent: {
+      paddingHorizontal: 12,
+      paddingBottom: 6,
     },
     statCell: {
       width: '50%',

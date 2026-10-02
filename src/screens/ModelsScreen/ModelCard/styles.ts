@@ -4,13 +4,10 @@ import {Theme} from '../../../utils/types';
 
 export const createStyles = (theme: Theme) =>
   StyleSheet.create({
+    // 背景/边框/圆角现由 <LiquidGlass variant="surface"> 提供；
+    // 这里只保留外边距，避免不透明底盖住玻璃层。radius 由组件传入 RADIUS.lg。
     card: {
-      borderRadius: 24, // Updated to match rounded-3xl (24px)
       margin: 6,
-      //overflow: 'hidden',
-      backgroundColor: theme.colors.background,
-      borderColor: theme.colors.outline,
-      borderWidth: 1,
     },
     cardContent: {
       paddingBottom: 6,

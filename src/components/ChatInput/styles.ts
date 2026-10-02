@@ -83,8 +83,14 @@ export const createStyles = ({
     inputContainer: {
       flex: 1,
       flexDirection: 'column',
-      borderRadius: 12,
-      overflow: 'hidden',
+      // 背景/圆角/裁剪改由外层 <LiquidGlass variant="overlay"> 提供；
+      // 这里保留布局属性，避免不透明底或重复裁剪破坏玻璃层。
+    },
+    // LiquidGlass 的内层容器需要吃满外层高度并沿用纵向布局，
+    // 编辑栏（position:absolute）也以它为定位父级。
+    inputContainerInner: {
+      flex: 1,
+      flexDirection: 'column',
     },
     textInputArea: {
       flex: 1,

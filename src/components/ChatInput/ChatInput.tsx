@@ -25,6 +25,8 @@ import {
   AtomIcon,
 } from '../../assets/icons';
 
+import {LiquidGlass, RADIUS} from '../LiquidGlass';
+
 import {useTheme} from '../../hooks';
 
 import {createStyles} from './styles';
@@ -388,7 +390,13 @@ export const ChatInput = observer(
 
     return (
       <View style={styles.container}>
-        <View style={styles.inputContainer}>
+        {/* 输入框浮在消息列表之上，用 overlay 层（比 surface 更实），
+            保证文字可读性；内部布局保持不变。 */}
+        <LiquidGlass
+          variant="overlay"
+          radius={RADIUS.sm}
+          style={styles.inputContainer}
+          contentStyle={styles.inputContainerInner}>
           {/* Edit Bar (when in edit mode) */}
           {isEditMode && (
             <Animated.View
@@ -688,7 +696,7 @@ export const ChatInput = observer(
               )}
             </View>
           </View>
-        </View>
+        </LiquidGlass>
       </View>
     );
   },

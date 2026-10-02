@@ -6,6 +6,7 @@ import {BatteryCharging, Gauge, Zap} from 'lucide-react-native';
 import {useTheme} from '../../hooks';
 import {t} from '../../locales';
 import {L10nContext} from '../../utils';
+import {LiquidGlass, RADIUS} from '../../components/LiquidGlass';
 
 import {createStyles} from './styles';
 import {
@@ -375,7 +376,11 @@ export const PerformanceModeSection: React.FC = () => {
   const showProfileWarning = applyState === 'partial';
 
   return (
-    <Card elevation={0} style={styles.card} testID="performance-mode-card">
+    <LiquidGlass
+      variant="surface"
+      radius={RADIUS.md}
+      style={styles.card}
+      testID="performance-mode-card">
       <Card.Title title={l10n.settings.performanceModeTitle} />
       <Card.Content>
         <View style={styles.settingItemContainer}>
@@ -600,7 +605,7 @@ export const PerformanceModeSection: React.FC = () => {
           </Text>
         </View>
       </Card.Content>
-    </Card>
+    </LiquidGlass>
   );
 };
 

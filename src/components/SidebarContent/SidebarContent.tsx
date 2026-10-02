@@ -9,7 +9,13 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTheme} from '../../hooks';
 import {createStyles} from './styles';
 import {chatSessionStore, SessionMetaData} from '../../store';
-import {Menu, RenameModal, Checkbox} from '..';
+// 直接从各组件源文件导入，绝不走 `..`（components barrel）。
+// 原因：SessionDrawer → SidebarContent → barrel → SessionDrawer 会形成循环依赖，
+// 在运行时表现为 "TypeError: undefined is not a function"（模块尚未完成初始化
+// 就被引用，取到 undefined）。这是本项目已踩过的坑，务必保持直接导入。
+import {Menu} from '../Menu';
+import {RenameModal} from '../RenameModal';
+import {Checkbox} from '../Checkbox';
 import {
   BenchmarkIcon,
   ChatIcon,

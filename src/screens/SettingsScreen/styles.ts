@@ -19,10 +19,11 @@ export const createStyles = (theme: Theme) =>
       paddingVertical: 16,
       paddingHorizontal: 16,
     },
+    // 外层分组容器现在由 <LiquidGlass variant="surface"> 提供背景，
+    // 这里只保留间距，避免再叠一层不透明底把玻璃盖住。
     card: {
       marginVertical: 8,
-      borderRadius: 12,
-      backgroundColor: theme.colors.background,
+      backgroundColor: 'transparent',
     },
     settingItemContainer: {
       marginVertical: 16,

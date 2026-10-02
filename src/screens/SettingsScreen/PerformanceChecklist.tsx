@@ -6,6 +6,7 @@ import DeviceInfo from 'react-native-device-info';
 
 import {useTheme} from '../../hooks';
 import {L10nContext} from '../../utils';
+import {LiquidGlass, RADIUS} from '../../components/LiquidGlass';
 
 import {createStyles} from './styles';
 import {
@@ -260,7 +261,11 @@ export const PerformanceChecklist: React.FC = () => {
   };
 
   return (
-    <Card elevation={0} style={styles.card} testID="performance-checklist-card">
+    <LiquidGlass
+      variant="surface"
+      radius={RADIUS.md}
+      style={styles.card}
+      testID="performance-checklist-card">
       <Card.Title title={l10n.settings.performanceChecklistTitle} />
       <Card.Content>
         {/* 完成横幅 */}
@@ -384,6 +389,6 @@ export const PerformanceChecklist: React.FC = () => {
           </Text>
         </View>
       </Card.Content>
-    </Card>
+    </LiquidGlass>
   );
 };

@@ -4,6 +4,7 @@ import {Card, Divider, Switch, Text} from 'react-native-paper';
 
 import {useTheme} from '../../hooks';
 import {L10nContext} from '../../utils';
+import {LiquidGlass, RADIUS} from '../../components/LiquidGlass';
 
 import {createStyles} from './styles';
 import {
@@ -96,7 +97,11 @@ export const SmartModeCard: React.FC = () => {
   }
 
   return (
-    <Card elevation={0} style={styles.card} testID="smart-mode-card">
+    <LiquidGlass
+      variant="surface"
+      radius={RADIUS.md}
+      style={styles.card}
+      testID="smart-mode-card">
       <Card.Title title={l10n.settings.smartModeTitle} />
       <Card.Content>
         <View style={styles.switchContainer}>
@@ -143,6 +148,6 @@ export const SmartModeCard: React.FC = () => {
           </Text>
         ) : null}
       </Card.Content>
-    </Card>
+    </LiquidGlass>
   );
 };
