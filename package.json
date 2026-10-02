@@ -94,6 +94,9 @@
     "uuid": "^13.0.0",
     "zod": "^4.1.12"
   },
+  "resolutions": {
+    "@react-navigation/elements": "2.9.3"
+  },
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@babel/plugin-proposal-decorators": "^7.28.0",
@@ -144,8 +147,5 @@
     "android": {
       "javaPackageName": "com.pocketpal.specs"
     }
-  },
-  "resolutions": {
-    "@react-navigation/elements": "2.9.44"
   }
 }
