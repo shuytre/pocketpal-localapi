@@ -16,7 +16,7 @@ exports[`MessageContent — snapshot matrix baseline (variant x size x {default,
       [
         {
           "alignSelf": "flex-start",
-          "backgroundColor": "rgba(51, 51, 51, 0.02)",
+          "backgroundColor": "rgba(15, 23, 42, 0.02)",
           "borderRadius": 16,
           "maxWidth": "85%",
           "paddingHorizontal": 16,
@@ -30,7 +30,7 @@ exports[`MessageContent — snapshot matrix baseline (variant x size x {default,
     <Text
       style={
         {
-          "color": "#333333",
+          "color": "#0F172A",
           "fontFamily": "Inter-Regular",
           "fontSize": 16,
           "fontWeight": "400",
@@ -60,7 +60,7 @@ exports[`MessageContent — snapshot matrix baseline (variant x size x {default,
       [
         {
           "alignSelf": "flex-start",
-          "backgroundColor": "rgba(51, 51, 51, 0.02)",
+          "backgroundColor": "rgba(15, 23, 42, 0.02)",
           "borderRadius": 16,
           "maxWidth": "85%",
           "paddingHorizontal": 16,
@@ -74,7 +74,7 @@ exports[`MessageContent — snapshot matrix baseline (variant x size x {default,
     <Text
       style={
         {
-          "color": "#333333",
+          "color": "#0F172A",
           "fontFamily": "Inter-Regular",
           "fontSize": 16,
           "fontWeight": "400",
@@ -104,7 +104,7 @@ exports[`MessageContent — snapshot matrix baseline (variant x size x {default,
       [
         {
           "alignSelf": "center",
-          "backgroundColor": "rgba(51, 51, 51, 0.01)",
+          "backgroundColor": "rgba(15, 23, 42, 0.01)",
           "borderRadius": 16,
           "maxWidth": "85%",
           "paddingHorizontal": 16,
@@ -148,7 +148,7 @@ exports[`MessageContent — snapshot matrix baseline (variant x size x {default,
       [
         {
           "alignSelf": "center",
-          "backgroundColor": "rgba(51, 51, 51, 0.01)",
+          "backgroundColor": "rgba(15, 23, 42, 0.01)",
           "borderRadius": 16,
           "maxWidth": "85%",
           "paddingHorizontal": 16,

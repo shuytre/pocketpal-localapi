@@ -18,7 +18,7 @@ exports[`Label — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "alignSelf": "flex-start",
-          "backgroundColor": "rgba(51, 51, 51, 0.02)",
+          "backgroundColor": "rgba(15, 23, 42, 0.02)",
           "borderRadius": 4,
           "flexDirection": "row",
           "gap": 2,
@@ -33,7 +33,7 @@ exports[`Label — snapshot matrix baseline (variant x size x {default,disabled}
     <Text
       style={
         {
-          "color": "#333333",
+          "color": "#0F172A",
           "fontFamily": "Inter-Regular",
           "fontSize": 12,
           "fontWeight": "400",
@@ -65,7 +65,7 @@ exports[`Label — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "alignSelf": "flex-start",
-          "backgroundColor": "rgba(51, 51, 51, 0.02)",
+          "backgroundColor": "rgba(15, 23, 42, 0.02)",
           "borderRadius": 4,
           "flexDirection": "row",
           "gap": 2,
@@ -80,7 +80,7 @@ exports[`Label — snapshot matrix baseline (variant x size x {default,disabled}
     <Text
       style={
         {
-          "color": "#333333",
+          "color": "#0F172A",
           "fontFamily": "Inter-Regular",
           "fontSize": 12,
           "fontWeight": "400",
@@ -112,7 +112,7 @@ exports[`Label — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "alignSelf": "flex-start",
-          "backgroundColor": "rgba(51, 51, 51, 0.02)",
+          "backgroundColor": "rgba(15, 23, 42, 0.02)",
           "borderRadius": 4,
           "flexDirection": "row",
           "gap": 2,
@@ -127,7 +127,7 @@ exports[`Label — snapshot matrix baseline (variant x size x {default,disabled}
     <Text
       style={
         {
-          "color": "#333333",
+          "color": "#0F172A",
           "fontFamily": "Inter-Regular",
           "fontSize": 11,
           "fontWeight": "400",
@@ -159,7 +159,7 @@ exports[`Label — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "alignSelf": "flex-start",
-          "backgroundColor": "rgba(51, 51, 51, 0.02)",
+          "backgroundColor": "rgba(15, 23, 42, 0.02)",
           "borderRadius": 4,
           "flexDirection": "row",
           "gap": 2,
@@ -174,7 +174,7 @@ exports[`Label — snapshot matrix baseline (variant x size x {default,disabled}
     <Text
       style={
         {
-          "color": "#333333",
+          "color": "#0F172A",
           "fontFamily": "Inter-Regular",
           "fontSize": 11,
           "fontWeight": "400",
@@ -958,7 +958,7 @@ exports[`Label — snapshot matrix non-Latin font-fallback canary (canaryVariant
         {
           "alignItems": "center",
           "alignSelf": "flex-start",
-          "backgroundColor": "rgba(51, 51, 51, 0.02)",
+          "backgroundColor": "rgba(15, 23, 42, 0.02)",
           "borderRadius": 4,
           "flexDirection": "row",
           "gap": 2,
@@ -973,7 +973,7 @@ exports[`Label — snapshot matrix non-Latin font-fallback canary (canaryVariant
     <Text
       style={
         {
-          "color": "#333333",
+          "color": "#0F172A",
           "fontFamily": "Inter-Regular",
           "fontSize": 11,
           "fontWeight": "400",

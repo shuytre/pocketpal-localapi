@@ -32,6 +32,13 @@ module.exports = {
   ],
   testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
   moduleNameMapper: {
+    // TwinCore：底部导航栏改用 lucide 图标后新增。该包的 `react-native`
+    // 字段指向 ESM（dist/esm/*.mjs），而 lucide 不在下面的 transform
+    // 白名单里，于是 Jest 不转换它，直接报 `Unexpected token 'export'`
+    // （实测波及 72 个测试文件，全部只要 import 链碰到图标就炸）。
+    // 这里指到它的 CJS 构建：省掉整棵 ESM 图标树的 Babel 转换，快且确定。
+    'lucide-react-native':
+      '<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js',
     '@react-native-async-storage/async-storage':
       '<rootDir>/__mocks__/external/@react-native-async-storage/async-storage.js',
     'llama.rn': '<rootDir>/__mocks__/external/llama.rn.ts',

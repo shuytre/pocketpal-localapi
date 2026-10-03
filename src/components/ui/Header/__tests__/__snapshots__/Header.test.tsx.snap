@@ -16,7 +16,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       [
         {
           "alignItems": "center",
-          "backgroundColor": "#F9FAFB",
+          "backgroundColor": "#FFFFFF",
           "flexDirection": "row",
           "paddingHorizontal": 16,
           "paddingVertical": 8,
@@ -40,7 +40,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       <Text
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "fontFamily": "Inter-Medium",
             "fontSize": 18,
             "fontWeight": "500",
@@ -85,7 +85,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       [
         {
           "alignItems": "center",
-          "backgroundColor": "#F9FAFB",
+          "backgroundColor": "#FFFFFF",
           "flexDirection": "row",
           "paddingHorizontal": 16,
           "paddingVertical": 8,
@@ -109,7 +109,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       <Text
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "fontFamily": "Inter-Medium",
             "fontSize": 18,
             "fontWeight": "500",
@@ -154,7 +154,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       [
         {
           "alignItems": "center",
-          "backgroundColor": "#F9FAFB",
+          "backgroundColor": "#FFFFFF",
           "flexDirection": "row",
           "paddingHorizontal": 16,
           "paddingVertical": 8,
@@ -180,7 +180,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       <Text
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "fontFamily": "Inter-Medium",
             "fontSize": 18,
             "fontWeight": "500",
@@ -225,7 +225,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       [
         {
           "alignItems": "center",
-          "backgroundColor": "#F9FAFB",
+          "backgroundColor": "#FFFFFF",
           "flexDirection": "row",
           "paddingHorizontal": 16,
           "paddingVertical": 8,
@@ -251,7 +251,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       <Text
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "fontFamily": "Inter-Medium",
             "fontSize": 18,
             "fontWeight": "500",
@@ -296,7 +296,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       [
         {
           "alignItems": "center",
-          "backgroundColor": "#F9FAFB",
+          "backgroundColor": "#FFFFFF",
           "flexDirection": "row",
           "paddingHorizontal": 16,
           "paddingVertical": 8,
@@ -317,7 +317,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       <Text
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "fontFamily": "Inter-Medium",
             "fontSize": 18,
             "fontWeight": "500",
@@ -362,7 +362,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       [
         {
           "alignItems": "center",
-          "backgroundColor": "#F9FAFB",
+          "backgroundColor": "#FFFFFF",
           "flexDirection": "row",
           "paddingHorizontal": 16,
           "paddingVertical": 8,
@@ -383,7 +383,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       <Text
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "fontFamily": "Inter-Medium",
             "fontSize": 18,
             "fontWeight": "500",
@@ -428,7 +428,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       [
         {
           "alignItems": "center",
-          "backgroundColor": "#F9FAFB",
+          "backgroundColor": "#FFFFFF",
           "flexDirection": "row",
           "paddingHorizontal": 16,
           "paddingVertical": 8,
@@ -451,7 +451,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       <Text
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "fontFamily": "Inter-Medium",
             "fontSize": 18,
             "fontWeight": "500",
@@ -496,7 +496,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       [
         {
           "alignItems": "center",
-          "backgroundColor": "#F9FAFB",
+          "backgroundColor": "#FFFFFF",
           "flexDirection": "row",
           "paddingHorizontal": 16,
           "paddingVertical": 8,
@@ -519,7 +519,7 @@ exports[`Header — snapshot matrix baseline (variant x size x {default,disabled
       <Text
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "fontFamily": "Inter-Medium",
             "fontSize": 18,
             "fontWeight": "500",
@@ -564,7 +564,7 @@ exports[`Header — snapshot matrix non-Latin font-fallback canary (canaryVarian
       [
         {
           "alignItems": "center",
-          "backgroundColor": "#F9FAFB",
+          "backgroundColor": "#FFFFFF",
           "flexDirection": "row",
           "paddingHorizontal": 16,
           "paddingVertical": 8,
@@ -585,7 +585,7 @@ exports[`Header — snapshot matrix non-Latin font-fallback canary (canaryVarian
       <Text
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "fontFamily": "Inter-Medium",
             "fontSize": 18,
             "fontWeight": "500",

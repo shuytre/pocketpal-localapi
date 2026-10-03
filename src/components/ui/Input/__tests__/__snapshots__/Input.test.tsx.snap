@@ -30,7 +30,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "flex-start",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -48,7 +48,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         placeholderTextColor="#646466"
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "flex": 1,
             "fontFamily": "Inter-Regular",
             "fontSize": 16,
@@ -109,7 +109,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "flex-start",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -127,7 +127,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         placeholderTextColor="#646466"
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "flex": 1,
             "fontFamily": "Inter-Regular",
             "fontSize": 16,
@@ -188,7 +188,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "flex-start",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -267,7 +267,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "flex-start",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -346,7 +346,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "flex-start",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -364,7 +364,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         placeholderTextColor="#646466"
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "flex": 1,
             "fontFamily": "Inter-Regular",
             "fontSize": 16,
@@ -425,7 +425,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "flex-start",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -443,7 +443,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         placeholderTextColor="#646466"
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "flex": 1,
             "fontFamily": "Inter-Regular",
             "fontSize": 16,
@@ -504,7 +504,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "flex-start",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -583,7 +583,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "flex-start",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -662,7 +662,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "flex-start",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -680,7 +680,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         placeholderTextColor="#646466"
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "flex": 1,
             "fontFamily": "Inter-Regular",
             "fontSize": 16,
@@ -741,7 +741,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "flex-start",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -759,7 +759,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         placeholderTextColor="#646466"
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "flex": 1,
             "fontFamily": "Inter-Regular",
             "fontSize": 16,
@@ -820,7 +820,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "flex-start",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -899,7 +899,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "flex-start",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -978,7 +978,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -996,7 +996,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         placeholderTextColor="#646466"
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "flex": 1,
             "fontFamily": "Inter-Regular",
             "fontSize": 16,
@@ -1057,7 +1057,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -1075,7 +1075,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         placeholderTextColor="#646466"
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "flex": 1,
             "fontFamily": "Inter-Regular",
             "fontSize": 16,
@@ -1136,7 +1136,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -1215,7 +1215,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -1294,7 +1294,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -1312,7 +1312,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         placeholderTextColor="#646466"
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "flex": 1,
             "fontFamily": "Inter-Regular",
             "fontSize": 16,
@@ -1373,7 +1373,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -1391,7 +1391,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         placeholderTextColor="#646466"
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "flex": 1,
             "fontFamily": "Inter-Regular",
             "fontSize": 16,
@@ -1452,7 +1452,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -1531,7 +1531,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -1610,7 +1610,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -1628,7 +1628,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         placeholderTextColor="#646466"
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "flex": 1,
             "fontFamily": "Inter-Regular",
             "fontSize": 16,
@@ -1689,7 +1689,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -1707,7 +1707,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         placeholderTextColor="#646466"
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "flex": 1,
             "fontFamily": "Inter-Regular",
             "fontSize": 16,
@@ -1768,7 +1768,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -1847,7 +1847,7 @@ exports[`Input — snapshot matrix baseline (variant x size x {default,disabled}
         {
           "alignItems": "center",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -1926,7 +1926,7 @@ exports[`Input — snapshot matrix non-Latin font-fallback canary (canaryVariant
         {
           "alignItems": "center",
           "backgroundColor": "transparent",
-          "borderBottomColor": "rgba(51, 51, 51, 0.05)",
+          "borderBottomColor": "rgba(15, 23, 42, 0.05)",
           "borderBottomWidth": 1,
           "flexDirection": "row",
           "gap": 4,
@@ -1944,7 +1944,7 @@ exports[`Input — snapshot matrix non-Latin font-fallback canary (canaryVariant
         placeholderTextColor="#646466"
         style={
           {
-            "color": "#333333",
+            "color": "#0F172A",
             "flex": 1,
             "fontFamily": "Inter-Regular",
             "fontSize": 16,
