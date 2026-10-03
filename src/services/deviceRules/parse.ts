@@ -32,7 +32,10 @@ const isHuggingFaceUrl = (url: unknown): url is string => {
   }
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'https:' && parsed.host === 'huggingface.co';
+    return (
+      parsed.protocol === 'https:' &&
+      (parsed.host === 'huggingface.co' || parsed.host === 'hf-mirror.com')
+    );
   } catch {
     return false;
   }
