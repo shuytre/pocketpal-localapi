@@ -43,14 +43,36 @@ const referenced = [
   ),
 ].sort();
 
+const actionExists = fs.existsSync(ACTION);
+
 const consumedPaths = (() => {
+  if (!actionExists) {
+    return null;
+  }
   const match = fs
     .readFileSync(ACTION, 'utf-8')
     .match(/^\s*CONSUMED_PATHS="([^"]*)"/m);
   return match ? match[1].trim().split(/\s+/).filter(Boolean) : null;
 })();
 
-describe('the parse itself', () => {
+// 这个测试守护的是 .github/actions/setup-hexagon-sdk —— 一个把~3 GB
+// Snapdragon SDK 重打包、并对其中被构建实际读取的子集做 digest 的 action。
+// 本 fork 没有 vendored 这个 action：.github/ 下只有 workflows/，且
+// build.yml 完全没有引用它（构建直接用预编译的 llama.rn，不自建 SDK）。
+// 所以这里没有可比对的两侧，action 若将来被引入，这些断言会自动恢复生效。
+const describeIfAction = actionExists ? describe : describe.skip;
+
+if (!actionExists) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[hexagon-sdk-coverage] 跳过：${path.relative(
+      ROOT,
+      ACTION,
+    )} 不存在，本 fork 未引入该 action`,
+  );
+}
+
+describeIfAction('the parse itself', () => {
   // Without these, a rename on either side makes every assertion below pass
   // over an empty set.
   it('finds the SDK paths llama.rn references', () => {
@@ -63,7 +85,7 @@ describe('the parse itself', () => {
   });
 });
 
-describe('the verified subset covers what the build consumes', () => {
+describeIfAction('the verified subset covers what the build consumes', () => {
   const covers = (consumed, ref) =>
     ref === consumed || ref.startsWith(`${consumed}/`);
 

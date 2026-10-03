@@ -36,7 +36,15 @@ const EXPECTED_SECTIONS = [
   'htmlPreview',
   'onboarding',
   'downloadBanner',
+  'localApi',
 ];
+
+// 本 fork 新增的 section，目前只有 en/zh 提供了译文。getTranslations()用
+// `_.merge({}, enData, langData)` 逐语言合并，所以其余语言会自动回退到英文
+// （用户看到英文文案，而不是裸露的 key）。因此「每个 section 都必须存在」
+// 对全部语言成立，但「section 数量」只对已翻译的语言成立 —— 用
+// RAW_SECTIONS 数原始 JSON，才是各语言文件自己的真实形状。
+const TRANSLATED_LANGUAGES: AvailableLanguage[] = ['en', 'zh'];
 
 const ALL_LANGUAGES: AvailableLanguage[] = [
   'en',
@@ -75,7 +83,35 @@ describe('l10n object', () => {
       for (const section of EXPECTED_SECTIONS) {
         expect(sections).toContain(section);
       }
+      // l10n 是合并后的结果，恒为全集；原始语言文件可以只翻译一部分。
       expect(sections).toHaveLength(EXPECTED_SECTIONS.length);
+    },
+  );
+
+  it.each(TRANSLATED_LANGUAGES)(
+    '%s translates every section natively',
+    lang => {
+      const raw = (
+        lang === 'en' ? enData : require(`../${lang}.json`)
+      ) as Record<string, unknown>;
+      expect(Object.keys(raw).sort()).toEqual([...EXPECTED_SECTIONS].sort());
+    },
+  );
+
+  it.each(ALL_LANGUAGES.filter(l => !TRANSLATED_LANGUAGES.includes(l)))(
+    '%s still resolves every section through the en fallback',
+    lang => {
+      // 合并后 section 齐全，且没有任何一个section 是空对象 —— 空对象会让
+      // 回退静默失效，界面变成一片空白。
+      const sections = l10n[lang] as unknown as Record<
+        string,
+        Record<string, string>
+      >;
+      for (const section of EXPECTED_SECTIONS) {
+        expect(Object.keys(sections[section] ?? {}).length).toBeGreaterThan(0);
+      }
+      // 未翻译的部分确实来自 en，而不是碰巧同名的独立译文。
+      expect(sections.localApi).toEqual(enData.localApi);
     },
   );
 

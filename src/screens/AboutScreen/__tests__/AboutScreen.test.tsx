@@ -42,7 +42,9 @@ describe('AboutScreen', () => {
   it('renders correctly', () => {
     const {getByText} = render(<AboutScreen />);
 
-    expect(getByText('PocketPal AI')).toBeTruthy();
+    // 上游致谢整句保留（MIT 要求），品牌名只是句中的一部分 ——
+    // getByText 走精确匹配，所以这里也要用整句。
+    expect(getByText('Based on PocketPal AI (MIT License)')).toBeTruthy();
     expect(getByText('v1.0.0 (100)')).toBeTruthy();
     expect(getByText(l10n.en.about.supportProject)).toBeTruthy();
     expect(getByText(l10n.en.about.githubButton)).toBeTruthy();
