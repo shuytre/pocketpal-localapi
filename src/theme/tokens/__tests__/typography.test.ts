@@ -11,6 +11,8 @@ import type {AvailableLanguage} from '../../../locales';
 import {
   FONT_FAMILIES,
   NON_LATIN_LOCALES,
+  darkColors,
+  lightColors,
   resolveTokens,
   typography,
   typographyForLocale,
@@ -118,14 +120,22 @@ describe('typography tokens', () => {
   });
 
   describe('mode resolution', () => {
+    // 断言 token 模块自己的常量，而不是把字面值抄一遍 —— 之前这里钉的是
+    // #ffffff / #000000，既不是上游值也不是本fork 的值（上游是
+    // #F9FAFB / #111827，TwinCore 换成了 #F8FAFC / #0A0E1A），所以它既
+    // 锁不住改动方向，也拦不住误改。引用常量后，fork 换色时这条会跟着
+    // 指向新的正确值，而 tokens 与实际渲染不一致仍然会失败。
     it('resolveTokens("light") returns lightColors bound', () => {
       const t = resolveTokens('light');
-      expect(t.colors.background).toBe('#ffffff');
+      expect(t.colors.background).toBe(lightColors.background);
+      expect(t.colors.background).toBe('#F8FAFC');
     });
 
     it('resolveTokens("dark") returns darkColors bound', () => {
       const t = resolveTokens('dark');
-      expect(t.colors.background).toBe('#000000');
+      expect(t.colors.background).toBe(darkColors.background);
+      // TwinCore 品牌深色背景。
+      expect(t.colors.background).toBe('#0A0E1A');
     });
 
     it('typography binding is shared across modes (locale swap is in builder)', () => {

@@ -57,10 +57,12 @@ describe('Theme builder — legacy surface preservation', () => {
   });
 
   describe('borders', () => {
-    it("matches today's pinned values (16 / 15 / 12)", () => {
+    it('keeps the pinned input/default radii and TwinCore bubbles at 18', () => {
+      // 16 / 12 是上游值；messageBorderRadius 被本 fork 统一到 18
+      // （src/utils/theme.ts:124「TwinCore: 聊天气泡统一 18px 圆角」）。
       expect(lightTheme.borders).toEqual({
         inputBorderRadius: 16,
-        messageBorderRadius: 15,
+        messageBorderRadius: 18,
         default: 12,
       });
     });
