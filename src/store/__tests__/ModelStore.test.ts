@@ -140,6 +140,11 @@ describe('ModelStore', () => {
   });
 
   describe('Hexagon load device resolution', () => {
+    // TwinCore 在 initContext 的最后一环用 initLlamaWithTwinCore 接管后端：
+    // 探测到 HTP 就走 HTP(99)，否则退 Adreno OpenCL(99)，最后 CPU(0)。
+    // 因此下面这些用例里用户设的 n_gpu_layers（37 / 0）到达 native 时
+    // 一律变成探测链的值 —— 断言的是这个契约，而不是用户的偏好。
+    // 链本身的行为由 src/utils/__tests__/twincore.test.ts 覆盖。
     const originalInitContext = modelStore.initContext;
     const discover = getBackendDevicesInfo as jest.Mock;
     const nativeInit = initializeLlama as jest.Mock;
@@ -200,7 +205,7 @@ describe('ModelStore', () => {
         expect(nativeInit).toHaveBeenCalledTimes(1);
         expect(nativeInit.mock.calls[0][0]).toMatchObject({
           devices: ['HTP2'],
-          n_gpu_layers: 37,
+          n_gpu_layers: 99,
           flash_attn_type: 'on',
           cache_type_k: CacheType.Q8_0,
           cache_type_v: CacheType.F16,
@@ -217,12 +222,17 @@ describe('ModelStore', () => {
       expect(nativeInit.mock.calls[0][0].devices).toEqual(['HTP0']);
     });
 
-    it('preserves an explicit zero GPU-layer setting', async () => {
+    it('still prefers HTP over a user-pinned zero GPU-layer count', async () => {
+      // 用户把 n_gpu_layers 设为 0 通常是想「别用加速器」，但 TwinCore 的
+      // 探测链优先级更高：骁龙 730 的 Hexagon 688 (HTP v3) 不在 llama.rn
+      // 的验证范围内，所以策略是「先试，不信任」—— 真失败会自动退到 CPU。
+      // 这里锁定该优先级，避免以后有人把链改成尊重用户设置而悄悄丢掉
+      // HTP 加速（那正是本 fork 在红米 K20 上提速的关键）。
       modelStore.setNGPULayers(0);
       await modelStore.initContext(basicModel);
       expect(nativeInit.mock.calls[0][0]).toMatchObject({
         devices: ['HTP2'],
-        n_gpu_layers: 0,
+        n_gpu_layers: 99,
       });
     });
 
@@ -232,10 +242,14 @@ describe('ModelStore', () => {
         const warning = jest
           .spyOn(console, 'warn')
           .mockImplementation(() => {});
+        // 用 mockResolvedValue 而非 Once：一次加载里探测会被调用两次
+        // （resolveDeviceSelection 先问一次，TwinCore 的 resolveTwinCoreBackendChain
+        // 再问一次），Once 只会让第一次失败，第二次就又看见 HTP 了 ——
+        // 那测到的就不是「探测不到设备」这个场景了。
         if (failure === 'rejected') {
-          discover.mockRejectedValueOnce(new Error('Discovery failed'));
+          discover.mockRejectedValue(new Error('Discovery failed'));
         } else {
-          discover.mockResolvedValueOnce(failure === 'empty' ? [] : undefined);
+          discover.mockResolvedValue(failure === 'empty' ? [] : undefined);
         }
         const saved = JSON.parse(JSON.stringify(modelStore.contextInitParams));
         await modelStore.initContext(basicModel);
@@ -247,10 +261,12 @@ describe('ModelStore', () => {
         });
         expect(modelStore.contextInitParams).toEqual(saved);
         await modelStore.releaseContext();
+        // 探测恢复后，同一个模型在下一档重新走 HTP —— 回退不是一次性的。
+        discover.mockResolvedValue(discovered(['HTP2', 'HTP0']));
         await modelStore.initContext(basicModel);
         expect(nativeInit.mock.calls[1][0]).toMatchObject({
           devices: ['HTP2'],
-          n_gpu_layers: 37,
+          n_gpu_layers: 99,
         });
         expect(modelStore.contextInitParams).toEqual(saved);
         warning.mockRestore();
@@ -258,23 +274,54 @@ describe('ModelStore', () => {
     );
 
     it.each([
-      {os: 'android', devices: undefined},
-      {os: 'android', devices: []},
-      {os: 'android', devices: ['CPU']},
-      {os: 'android', devices: ['Adreno']},
-      {os: 'ios', devices: undefined},
-      {os: 'ios', devices: ['Metal']},
-      {os: 'ios', devices: ['CPU']},
-      {os: 'ios', devices: ['HTP*']},
+      // Android：devices 和 n_gpu_layers 都由 TwinCore 的探测链决定 ——
+      // 本例探测到 HTP2，所以无论用户选了什么，到达 native 的都是 HTP2/99。
+      {
+        os: 'android',
+        devices: undefined,
+        expectDevices: ['HTP2'],
+        expectLayers: 99,
+      },
+      {os: 'android', devices: [], expectDevices: ['HTP2'], expectLayers: 99},
+      {
+        os: 'android',
+        devices: ['CPU'],
+        expectDevices: ['HTP2'],
+        expectLayers: 99,
+      },
+      {
+        os: 'android',
+        devices: ['Adreno'],
+        expectDevices: ['HTP2'],
+        expectLayers: 99,
+      },
+      // iOS：没有探测链，llama.rn / Metal 自己负责，原样透传。
+      {
+        os: 'ios',
+        devices: undefined,
+        expectDevices: undefined,
+        expectLayers: 37,
+      },
+      {
+        os: 'ios',
+        devices: ['Metal'],
+        expectDevices: ['Metal'],
+        expectLayers: 37,
+      },
+      {os: 'ios', devices: ['CPU'], expectDevices: ['CPU'], expectLayers: 37},
+      {os: 'ios', devices: ['HTP*'], expectDevices: ['HTP*'], expectLayers: 37},
     ])(
-      'preserves $os selection $devices without discovery',
-      async ({os, devices}) => {
+      'resolves $os selection $devices to $expectDevices / $expectLayers',
+      async ({os, devices, expectDevices, expectLayers}) => {
         Platform.OS = os as typeof Platform.OS;
         modelStore.setDevices(devices);
         await modelStore.initContext(basicModel);
-        expect(nativeInit.mock.calls[0][0].devices).toEqual(devices);
-        expect(nativeInit.mock.calls[0][0].n_gpu_layers).toBe(37);
-        expect(discover).not.toHaveBeenCalled();
+        expect(nativeInit.mock.calls[0][0].devices).toEqual(expectDevices);
+        expect(nativeInit.mock.calls[0][0].n_gpu_layers).toBe(expectLayers);
+        // 只有 iOS 路径不做后端探测。
+        if (os === 'ios') {
+          expect(discover).not.toHaveBeenCalled();
+        }
       },
     );
 
@@ -284,6 +331,11 @@ describe('ModelStore', () => {
       const started = new Promise<void>(resolve => {
         startedDiscovery = resolve;
       });
+      // 一次加载里探测会被调用两次：resolveDeviceSelection 一次，TwinCore
+      // 的探测链再一次。所以基础 mock 就返回 HTP3，而第一次调用被挂起，
+      // 让我们能在「探测未完成」的窗口里改用户偏好 —— 两次探测看到的
+      // 设备一致，断言测的才是「加载用的是同一份快照」。
+      discover.mockReset().mockResolvedValue(discovered(['HTP3']));
       discover.mockImplementationOnce(() => {
         startedDiscovery();
         return new Promise(resolve => {
@@ -298,7 +350,7 @@ describe('ModelStore', () => {
       await loading;
       expect(nativeInit.mock.calls[0][0]).toMatchObject({
         devices: ['HTP3'],
-        n_gpu_layers: 37,
+        n_gpu_layers: 99,
         flash_attn_type: 'on',
         cache_type_k: CacheType.Q8_0,
       });
@@ -308,14 +360,23 @@ describe('ModelStore', () => {
       });
     });
 
-    it('reports native initialization failure without retrying', async () => {
-      nativeInit.mockRejectedValueOnce(new Error('Native init failed'));
+    it('retries down the TwinCore chain and reports failure only when all backends fail', async () => {
+      // 上游这里断言「失败就不重试」。TwinCore 恰恰相反：Hexagon 初始化失败
+      // 不该把应用带崩（骁龙 730 的 HTP v3 不在 llama.rn 验证范围内），
+      // 所以逐档回退是本 fork 的核心行为。全档都失败才上报给用户。
+      const warning = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      nativeInit.mockRejectedValue(new Error('Native init failed'));
+
       await expect(modelStore.initContext(basicModel)).rejects.toThrow(
         'Native init failed',
       );
-      expect(nativeInit).toHaveBeenCalledTimes(1);
+      expect(nativeInit.mock.calls.map(c => c[0].devices)).toEqual([
+        ['HTP2'],
+        ['CPU'],
+      ]);
       expect(modelStore.modelLoadError).not.toBeNull();
       expect(modelStore.contextInitParams.devices).toEqual(['HTP*']);
+      warning.mockRestore();
     });
   });
 
@@ -619,7 +680,8 @@ describe('ModelStore', () => {
         'ggml-org/gemma-3-1b-it-GGUF/gemma-3-1b-it-Q4_K_M.gguf',
       );
       expect(m.downloadUrl).toBe(
-        'https://huggingface.co/ggml-org/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf',
+        // 本 fork 走 hf-mirror.com（国内直连），不是 huggingface.co。
+        'https://hf-mirror.com/ggml-org/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf',
       );
       expect(m.isRulePreset).toBe(true);
       expect(m.size).toBe(806058240);
@@ -685,7 +747,7 @@ describe('ModelStore', () => {
       );
       expect(proj).toBeDefined();
       expect(proj?.downloadUrl).toBe(
-        'https://huggingface.co/ggml-org/SmolVLM-500M-Instruct-GGUF/resolve/main/mmproj-SmolVLM-500M-Instruct-Q8_0.gguf',
+        'https://hf-mirror.com/ggml-org/SmolVLM-500M-Instruct-GGUF/resolve/main/mmproj-SmolVLM-500M-Instruct-Q8_0.gguf',
       );
     });
 
