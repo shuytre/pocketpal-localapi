@@ -46,7 +46,8 @@ describe('HFStore', () => {
 
       expect(hfStore.models).toHaveLength(2);
       expect(hfStore.models[0].url).toBe(
-        'https://huggingface.co/owner/hf-model-name-1',
+        // 本 fork 走 hf-mirror.com（国内直连），不是 huggingface.co。
+        'https://hf-mirror.com/owner/hf-model-name-1',
       );
       expect(hfStore.nextPageLink).toBe('next-page-url');
       expect(hfStore.error).toBe(null);

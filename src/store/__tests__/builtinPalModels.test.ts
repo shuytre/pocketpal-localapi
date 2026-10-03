@@ -12,8 +12,9 @@ describe('LOOKIE_DEFAULT_MODEL', () => {
   });
 
   it('bakes the download url and HF file metadata so no fetch is needed', () => {
+    // 本 fork 走 hf-mirror.com（国内直连），不是 huggingface.co。
     expect(LOOKIE_DEFAULT_MODEL.downloadUrl).toMatch(
-      /^https:\/\/huggingface\.co\/.+\/resolve\/main\/.+\.gguf$/,
+      /^https:\/\/hf-mirror\.com\/.+\/resolve\/main\/.+\.gguf$/,
     );
     expect(LOOKIE_DEFAULT_MODEL.hfModelFile?.url).toBe(
       LOOKIE_DEFAULT_MODEL.downloadUrl,

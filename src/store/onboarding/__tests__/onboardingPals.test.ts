@@ -60,10 +60,11 @@ describe('onboardingPals', () => {
   );
 
   it.each(allEntries)(
-    '%s/%s entry downloadUrl equals huggingface.co/<repo>/resolve/main/<filename>',
+    // 本 fork 走 hf-mirror.com（国内直连），不是 huggingface.co。
+    '%s/%s entry downloadUrl equals hf-mirror.com/<repo>/resolve/main/<filename>',
     (_palKey, _tier, entry) => {
       expect(entry.downloadUrl).toBe(
-        `https://huggingface.co/${entry.repo}/resolve/main/${entry.filename}`,
+        `https://hf-mirror.com/${entry.repo}/resolve/main/${entry.filename}`,
       );
     },
   );

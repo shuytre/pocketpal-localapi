@@ -34,7 +34,7 @@ export interface OnboardingPalModelEntry {
   filename: string;
   /** Derived from `repo.split('/')[0]` at module load. */
   author: string;
-  /** Deterministic `huggingface.co/<repo>/resolve/main/<filename>`. */
+  /** Deterministic `hf-mirror.com/<repo>/resolve/main/<filename>`. */
   downloadUrl: string;
   /** Shown on the screen-6 radio subtitle. */
   displayName: string;
